@@ -1,0 +1,50 @@
+# --- Python Basics ---
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual Environments ---
+# Common names for virtual envs
+venv/
+env/
+.env/
+.venv/
+venv.bak/
+
+# --- Environment Variables ---
+# SENSITIVE! Never push your API keys or passwords
+.env
+.env.local
+
+# --- Distribution / Packaging ---
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Unit Test / Coverage ---
+.tox/
+.nox/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints
+
+# --- Editor / IDE Settings ---
+# VS Code
+.vscode/
+# PyCharm / IntelliJ
+.idea/
+# Mac OS
+.DS_Store

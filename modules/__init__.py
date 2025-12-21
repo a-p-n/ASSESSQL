@@ -3,7 +3,7 @@
 # This allows: "from modules import DBManager" 
 # Instead of: "from modules.db_manager import DBManager"
 
-from .db_manager import DBManager
-from .ingestion import IngestionModule
-from .generator import GroundTruthGenerator
-from .evaluator import HybridEvaluator
+from modules.db_manager import DBManager
+from modules.ingestion import IngestionPipeline
+from modules.generator import SQLGenerator
+from modules.evaluator import HybridEvaluator
