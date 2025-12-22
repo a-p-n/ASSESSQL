@@ -14,7 +14,6 @@ from transformers import (
     BitsAndBytesConfig
 )
 import torch
-from ast_gen.ast_parser import SQLASTParser
 
 def initialize_model():
     print(f"--- Initializing Model: {config.MODEL_ID} ---")
@@ -49,71 +48,41 @@ def main():
 
     model, tokenizer = initialize_model()
 
-    # --- Level 1: Ingestion & Ground Truth Generation ---
-    ingestion = IngestionPipeline(pdf_path=config.PDF_PATH, output_dir=config.DATA_DIR)
+    print("\n--- Running Ingestion Module ---")
+    ingestion = IngestionPipeline(
+        pdf_path=config.PDF_PATH,
+        output_dir=config.DATA_DIR
+    )
     ingestion.run()
 
     if not ingestion.dataset:
         print("[!] Error: No data loaded from PDF. Exiting.")
         return
 
-    print("\n--- Level 1: Generating Ground Truth Library with ASTs ---")
+    print("\n--- Starting Generator Module ---")
     generator = SQLGenerator(model, tokenizer)
-    ast_parser = SQLASTParser()
-    gt_library = {} 
+    generator.run_pipeline(
+        dataset=ingestion.dataset,
+        schema_cache=ingestion.schema_cache,
+        schema_dir=config.SCHEMA_DIR
+    )
 
-    for item in ingestion.dataset:
-        db_id = item['db_id']
-        schema = ingestion.schema_cache.get(db_id)
-        
-        raw_gt_queries = generator.generate_queries(schema, item['question'], num_sequences=5)
-        
-        gt_with_asts = []
-        for sql in raw_gt_queries:
-            try:
-                ast_root = ast_parser.parse_sql_to_ast(sql)
-                ast_dict = ast_parser.ast_to_dict(ast_root)
-                gt_with_asts.append({
-                    "sql": sql,
-                    "ast": ast_dict
-                })
-            except Exception as e:
-                print(f"[!] AST Failure for: {sql[:30]}... Error: {e}")
-
-        gt_library[item['question']] = {
-            "db_id": db_id,
-            "variants": gt_with_asts
-        }
-
-    lib_path = os.path.join(config.DATA_DIR, "gt_library_with_asts.json")
-    with open(lib_path, "w") as f:
-        json.dump(gt_library, f, indent=2)
-    print(f"Level 1 Library saved to {lib_path}")
-
-    print("\n--- Level 2: Starting Evaluation Phase ---")
-    
-    with open(lib_path, "r") as f:
-        loaded_library = json.load(f)
+    print("\n--- Starting Level 2 Evaluation Demo ---")
+    with open(os.path.join(config.DATA_DIR, "final_results.json"), "r") as f:
+        level1_data = json.load(f)
 
     db_manager = DBManager(config.SCHEMA_DIR)
     evaluator = HybridEvaluator(db_manager)
     
-    sample_question = list(loaded_library.keys())[0]
-    sample_gt_data = loaded_library[sample_question]
-    
-    student_submission = "SELECT * FROM EMP"
+    sample_entry = level1_data[0]
+    student_submission = "SELECT * FROM EMP" # Placeholder
     rubric = {"projections": 20, "tables": 30, "filters": 50}
 
-    print(f"\n[EVALUATING]: {sample_question}")
-    report = evaluator.evaluate(student_submission, sample_gt_data, rubric)
-    # generator.run_pipeline(
-    #     dataset=ingestion.dataset,
-    #     schema_cache=ingestion.schema_cache,
-    #     schema_dir=config.SCHEMA_DIR
-    # )
+    print(f"\n[EVALUATING]: {sample_entry['question']}")
+    report = evaluator.evaluate(student_submission, sample_entry, rubric)
     
     print("\n========================================")
-    print("      Pipeline Finished Successfully    ")
+    print("      Pipeline Results Summary")
     print("========================================")
     print(f"Logical Similarity: {report['similarity_score'] * 100}%")
     print(f"Final Rubric Grade: {report['rubric_grade']} / 100")

@@ -4,6 +4,7 @@ import os
 import json
 import config
 from tqdm import tqdm
+from ast_gen.ast_parser import SQLASTParser #
 
 class SQLGenerator:
     def __init__(self, model, tokenizer):
@@ -11,6 +12,7 @@ class SQLGenerator:
         self.tokenizer = tokenizer
         self.device = model.device
         self.is_seq2seq = getattr(config, "MODEL_TYPE", "causal") == "seq2seq"
+        self.ast_parser = SQLASTParser()
 
     def _run_query(self, db_path, query):
         if any(k in query.upper() for k in ["DROP", "DELETE", "UPDATE", "INSERT", "ALTER"]):
@@ -38,7 +40,6 @@ class SQLGenerator:
 
     def generate_queries(self, schema, question, num_sequences=5, error_data=None):
         prompt = self._build_prompt(schema, question, error_data)
-        
         num_beams = 3 if error_data else (num_sequences + 2)
         num_return_sequences = 1 if error_data else num_sequences
 
@@ -57,67 +58,59 @@ class SQLGenerator:
         generated_queries = []
         for sequence in output_sequences:
             decoded = self.tokenizer.decode(sequence, skip_special_tokens=True)
-            
             if "```sql" in decoded:
                 sql = decoded.split("```sql")[1].split("```")[0].strip()
             elif "SELECT" in decoded.upper():
-                if "SELECT" in decoded:
-                     sql = "SELECT" + decoded.split("SELECT", 1)[1]
-                else:
-                     sql = decoded.strip()
+                sql = "SELECT" + decoded.split("SELECT", 1)[1] if "SELECT" in decoded else decoded.strip()
             else:
                 sql = decoded.strip()
-            
             generated_queries.append(sql)
-
         return generated_queries
 
     def run_pipeline(self, dataset, schema_cache, schema_dir):
         print(f"\n--- Generator Started: Processing {len(dataset)} questions ---")
         evaluation_results = []
         
-        for item in tqdm(dataset, desc="Generating"):
+        for item in tqdm(dataset, desc="Generating Ground Truths"):
             try:
                 question = item['question']
                 db_id = item['db_id']
-                gold_query = item.get('query', '') 
-
                 schema = schema_cache.get(db_id)
                 if not schema: continue
 
                 db_path = os.path.join(schema_dir, db_id, f"{db_id}.sqlite")
                 
-                predicted_sqls = self.generate_queries(schema, question, num_sequences=3)
-                best_prediction = predicted_sqls[0] if predicted_sqls else "Failed"
+                predicted_sqls = self.generate_queries(schema, question, num_sequences=5)
                 
-                valid_syntax = False
-                syntax_error = None
-                
-                if os.path.exists(db_path):
-                     status, result = self._run_query(db_path, best_prediction)
-                     if status == "success":
-                         valid_syntax = True
-                     else:
-                         syntax_error = result
-                else:
-                    status = "skipped_no_db"
+                variants_info = []
+                for sql in predicted_sqls:
+                    valid_syntax = False
+                    syntax_error = None
+                    if os.path.exists(db_path):
+                        status, result = self._run_query(db_path, sql)
+                        if status == "success":
+                            valid_syntax = True
+                        else:
+                            syntax_error = result
+                    
+                    ast_dict = {}
+                    try:
+                        ast_root = self.ast_parser.parse_sql_to_ast(sql)
+                        ast_dict = self.ast_parser.ast_to_dict(ast_root)
+                    except Exception as e:
+                        syntax_error = f"AST Parse Error: {str(e)}"
 
-                if status == "error":
-                    error_data = {
-                        "question": question, 
-                        "failed_sql": best_prediction, 
-                        "error_message": syntax_error
-                    }
-                    corrected = self.generate_queries(schema, question, error_data=error_data)
-                    if corrected:
-                        best_prediction = corrected[0] + " (Corrected)"
+                    variants_info.append({
+                        "sql": sql,
+                        "ast": ast_dict,
+                        "syntax_valid": valid_syntax,
+                        "error_log": syntax_error
+                    })
 
                 evaluation_results.append({
                     "question": question,
                     "db_id": db_id,
-                    "generated_sql": best_prediction,
-                    "syntax_valid": valid_syntax,
-                    "error_log": syntax_error
+                    "variants": variants_info
                 })
 
             except Exception as e:
@@ -129,4 +122,4 @@ class SQLGenerator:
         with open(output_file, "w") as f:
             json.dump(evaluation_results, f, indent=2)
         
-        print(f"Results saved to {output_file}")
+        print(f"Results with ASTs and Syntax Status saved to {output_file}")
