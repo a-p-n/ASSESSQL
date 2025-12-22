@@ -1,4 +1,6 @@
 import config
+import json
+import os
 from modules import (
     IngestionPipeline,
     DBManager,
@@ -12,12 +14,10 @@ from transformers import (
     BitsAndBytesConfig
 )
 import torch
+from ast_gen.ast_parser import SQLASTParser
 
 def initialize_model():
     print(f"--- Initializing Model: {config.MODEL_ID} ---")
-    print(f"Using Device: {config.DEVICE}")
-    print(f"Model Type: {getattr(config, 'MODEL_TYPE', 'causal')}")
-
     tokenizer = AutoTokenizer.from_pretrained(config.MODEL_ID)
     
     if getattr(config, "MODEL_TYPE", "causal") == "seq2seq":
@@ -40,7 +40,6 @@ def initialize_model():
         )
 
     model.eval()
-    print("Model loaded successfully.")
     return model, tokenizer
 
 def main():
@@ -50,7 +49,7 @@ def main():
 
     model, tokenizer = initialize_model()
 
-    print("\n--- Running Ingestion Module ---")
+    print("\n--- Level 1: Running Ingestion Module ---")
     ingestion = IngestionPipeline(pdf_path=config.PDF_PATH, output_dir=config.DATA_DIR)
     ingestion.run()
 
@@ -58,44 +57,66 @@ def main():
         print("[!] Error: No data loaded from PDF. Exiting.")
         return
 
-    print("\n--- Starting Generator Module ---")
-
+    print("\n--- Level 1: Generating Ground Truth Library with ASTs ---")
     generator = SQLGenerator(model, tokenizer)
+    ast_parser = SQLASTParser() #
     gt_library = {} 
+
     for item in ingestion.dataset:
         db_id = item['db_id']
         schema = ingestion.schema_cache.get(db_id)
-        gt_queries = generator.generate_queries(schema, item['question'], num_sequences=5)
-        gt_library[item['question']] = gt_queries
+        
+        raw_gt_queries = generator.generate_queries(schema, item['question'], num_sequences=5)
+        
+        gt_with_asts = []
+        for sql in raw_gt_queries:
+            try:
+                ast_root = ast_parser.parse_sql_to_ast(sql)
+                ast_dict = ast_parser.ast_to_dict(ast_root)
+                gt_with_asts.append({
+                    "sql": sql,
+                    "ast": ast_dict
+                })
+            except Exception as e:
+                print(f"[!] AST generation failed for: {sql}. Error: {e}")
 
-    print("\n--- Starting Evaluation Phase ---")
+        gt_library[item['question']] = gt_with_asts
+
+    lib_path = os.path.join(config.DATA_DIR, "gt_library_with_asts.json")
+    with open(lib_path, "w") as f:
+        json.dump(gt_library, f, indent=2)
+    print(f"Success: Level 1 Library saved to {lib_path}")
+
+    print("\n--- Level 2: Starting Evaluation Phase ---")
+    
+    with open(lib_path, "r") as f:
+        loaded_library = json.load(f)
+
     db_manager = DBManager(config.SCHEMA_DIR)
     evaluator = HybridEvaluator(db_manager)
     
+    sample_question = list(loaded_library.keys())[0]
+    sample_gt_data = loaded_library[sample_question]
+    
+    student_submission = "SELECT * FROM EMP"
     rubric = {"projections": 20, "tables": 30, "filters": 50}
 
-    sample_question = ingestion.dataset[0]['question']
-    sample_ground_truths = gt_library[sample_question]
-    
-    student_submission = "SELECT * FROM EMP" 
-
     print(f"\n[EVALUATING SUBMISSION FOR]: {sample_question}")
-    report = evaluator.evaluate(student_submission, sample_ground_truths, rubric)    
+    report = evaluator.evaluate(student_submission, sample_gt_data, rubric)
     # generator.run_pipeline(
     #     dataset=ingestion.dataset,
     #     schema_cache=ingestion.schema_cache,
     #     schema_dir=config.SCHEMA_DIR
     # )
-
+    
     print("\n========================================")
     print("      Pipeline Finished Successfully    ")
     print("========================================")
-
     print(f"Logical Similarity: {report['similarity_score'] * 100}%")
     print(f"Final Rubric Grade: {report['rubric_grade']} / 100")
     print(f"Execution Match:    {report['execution_match']}")
-    print("\n[FEEDBACK]:")
-    for msg in report['feedback']:
+    print("\n[PEDAGOGICAL FEEDBACK]:")
+    for msg in report['pedagogical_feedback']:
         print(f" - {msg}")
 
 if __name__ == "__main__":
