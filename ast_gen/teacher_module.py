@@ -2,9 +2,9 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
 
-from ast_parser import SQLASTParser
-from database import DatabaseManager
-from models import QueryMetadata, TeacherQuestion, ASTNode
+from ast_gen.ast_parser import SQLASTParser
+from ast_gen.database import DatabaseManager
+from ast_gen.models import QueryMetadata, TeacherQuestion, ASTNode
 
 class GroundTruthGenerator:
     

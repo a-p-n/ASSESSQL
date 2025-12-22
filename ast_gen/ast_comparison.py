@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 import json
 
-from models import ASTNode, ASTNodeType, ASTComparisonResult
+from ast_gen.models import ASTNode, ASTNodeType, ASTComparisonResult
 
 class ComparisonType(str, Enum):
     EXACT_MATCH = "exact_match"

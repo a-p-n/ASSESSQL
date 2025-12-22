@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 import json
 
-from .models import QueryMetadata, ASTNode
+from ast_gen.models import QueryMetadata, ASTNode
 from config import DatabaseConfig
 
 Base = declarative_base()

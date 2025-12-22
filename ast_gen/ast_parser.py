@@ -1,7 +1,7 @@
 import sqlparse
 from sqlparse import sql, tokens
 from typing import List, Dict, Any, Optional, Tuple
-from models import ASTNode, ASTNodeType
+from ast_gen.models import ASTNode, ASTNodeType
 
 class SQLASTParser:
     def __init__(self):

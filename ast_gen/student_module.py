@@ -2,9 +2,9 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
 
-from ast_parser import SQLASTParser
-from ast_comparison import ASTComparator, ComparisonType
-from models import QueryMetadata, StudentSubmission, ASTNode, ASTComparisonResult
+from ast_gen.ast_parser import SQLASTParser
+from ast_gen.ast_comparison import ASTComparator, ComparisonType
+from ast_gen.models import QueryMetadata, StudentSubmission, ASTNode, ASTComparisonResult
 
 class StudentQueryProcessor:
     def __init__(self):
