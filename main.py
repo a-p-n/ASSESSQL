@@ -49,7 +49,7 @@ def main():
 
     model, tokenizer = initialize_model()
 
-    print("\n--- Level 1: Running Ingestion Module ---")
+    # --- Level 1: Ingestion & Ground Truth Generation ---
     ingestion = IngestionPipeline(pdf_path=config.PDF_PATH, output_dir=config.DATA_DIR)
     ingestion.run()
 
@@ -59,7 +59,7 @@ def main():
 
     print("\n--- Level 1: Generating Ground Truth Library with ASTs ---")
     generator = SQLGenerator(model, tokenizer)
-    ast_parser = SQLASTParser() #
+    ast_parser = SQLASTParser()
     gt_library = {} 
 
     for item in ingestion.dataset:
@@ -78,14 +78,17 @@ def main():
                     "ast": ast_dict
                 })
             except Exception as e:
-                print(f"[!] AST generation failed for: {sql}. Error: {e}")
+                print(f"[!] AST Failure for: {sql[:30]}... Error: {e}")
 
-        gt_library[item['question']] = gt_with_asts
+        gt_library[item['question']] = {
+            "db_id": db_id,
+            "variants": gt_with_asts
+        }
 
     lib_path = os.path.join(config.DATA_DIR, "gt_library_with_asts.json")
     with open(lib_path, "w") as f:
         json.dump(gt_library, f, indent=2)
-    print(f"Success: Level 1 Library saved to {lib_path}")
+    print(f"Level 1 Library saved to {lib_path}")
 
     print("\n--- Level 2: Starting Evaluation Phase ---")
     
@@ -101,7 +104,7 @@ def main():
     student_submission = "SELECT * FROM EMP"
     rubric = {"projections": 20, "tables": 30, "filters": 50}
 
-    print(f"\n[EVALUATING SUBMISSION FOR]: {sample_question}")
+    print(f"\n[EVALUATING]: {sample_question}")
     report = evaluator.evaluate(student_submission, sample_gt_data, rubric)
     # generator.run_pipeline(
     #     dataset=ingestion.dataset,
