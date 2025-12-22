@@ -51,10 +51,7 @@ def main():
     model, tokenizer = initialize_model()
 
     print("\n--- Running Ingestion Module ---")
-    ingestion = IngestionPipeline(
-        pdf_path=config.PDF_PATH,
-        output_dir=config.DATA_DIR
-    )
+    ingestion = IngestionPipeline(pdf_path=config.PDF_PATH, output_dir=config.DATA_DIR)
     ingestion.run()
 
     if not ingestion.dataset:
@@ -62,18 +59,44 @@ def main():
         return
 
     print("\n--- Starting Generator Module ---")
-    
+
     generator = SQLGenerator(model, tokenizer)
+    gt_library = {} 
+    for item in ingestion.dataset:
+        db_id = item['db_id']
+        schema = ingestion.schema_cache.get(db_id)
+        gt_queries = generator.generate_queries(schema, item['question'], num_sequences=5)
+        gt_library[item['question']] = gt_queries
+
+    print("\n--- Starting Evaluation Phase ---")
+    db_manager = DBManager(config.SCHEMA_DIR)
+    evaluator = HybridEvaluator(db_manager)
     
-    generator.run_pipeline(
-        dataset=ingestion.dataset,
-        schema_cache=ingestion.schema_cache,
-        schema_dir=config.SCHEMA_DIR
-    )
+    rubric = {"projections": 20, "tables": 30, "filters": 50}
+
+    sample_question = ingestion.dataset[0]['question']
+    sample_ground_truths = gt_library[sample_question]
+    
+    student_submission = "SELECT * FROM EMP" 
+
+    print(f"\n[EVALUATING SUBMISSION FOR]: {sample_question}")
+    report = evaluator.evaluate(student_submission, sample_ground_truths, rubric)    
+    # generator.run_pipeline(
+    #     dataset=ingestion.dataset,
+    #     schema_cache=ingestion.schema_cache,
+    #     schema_dir=config.SCHEMA_DIR
+    # )
 
     print("\n========================================")
     print("      Pipeline Finished Successfully    ")
     print("========================================")
+
+    print(f"Logical Similarity: {report['similarity_score'] * 100}%")
+    print(f"Final Rubric Grade: {report['rubric_grade']} / 100")
+    print(f"Execution Match:    {report['execution_match']}")
+    print("\n[FEEDBACK]:")
+    for msg in report['feedback']:
+        print(f" - {msg}")
 
 if __name__ == "__main__":
     main()

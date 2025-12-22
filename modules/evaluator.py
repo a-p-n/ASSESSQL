@@ -1,5 +1,6 @@
 import sqlglot
 from .db_manager import DBManager
+from ast_gen.student_module import StudentQueryProcessor
 
 class HybridEvaluator:
     def __init__(self, db_manager: DBManager):
@@ -13,17 +14,9 @@ class HybridEvaluator:
 
     def evaluate(self, student_sql, ground_truth_sqls, rubric=None):
         if not rubric:
-            rubric = {
-                "projections": 20, 
-                "tables": 30, 
-                "filters": 50
-            }
+            rubric = {"projections": 20, "tables": 30, "filters": 50}
 
-        ast_report = self.ast_processor.evaluate_submission(
-            student_sql, 
-            ground_truth_sqls, 
-            rubric
-        )
+        ast_report = self.ast_processor.evaluate_submission(student_sql, ground_truth_sqls, rubric)
 
         execution_match = False
         execution_error = None
