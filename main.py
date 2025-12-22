@@ -1,8 +1,8 @@
-import config  # Imports settings from config.py
+import config
 from modules import (
-    IngestionPipeline,  # Matches your __init__.py
+    IngestionPipeline,
     DBManager,
-    SQLGenerator,       # Matches your __init__.py
+    SQLGenerator,
     HybridEvaluator
 )
 from transformers import (
@@ -14,25 +14,18 @@ from transformers import (
 import torch
 
 def initialize_model():
-    """
-    Initializes the model based on config.py settings.
-    Handles the difference between T5 (Seq2Seq) and SQLCoder (Causal).
-    """
     print(f"--- Initializing Model: {config.MODEL_ID} ---")
     print(f"Using Device: {config.DEVICE}")
     print(f"Model Type: {getattr(config, 'MODEL_TYPE', 'causal')}")
 
     tokenizer = AutoTokenizer.from_pretrained(config.MODEL_ID)
     
-    # Check if we are using a Seq2Seq model (like T5) or Causal (like Llama/SQLCoder)
     if getattr(config, "MODEL_TYPE", "causal") == "seq2seq":
-        # T5-Base is small enough to run without 4-bit quantization usually
         model = AutoModelForSeq2SeqLM.from_pretrained(
             config.MODEL_ID,
             device_map="auto"
         )
     else:
-        # Configuration for larger Causal models (SQLCoder, etc.)
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
@@ -55,12 +48,8 @@ def main():
     print("      AssessSQL Pipeline Initiated      ")
     print("========================================")
 
-    # 1. LOAD MODEL
-    # We do this first so we fail fast if the model is wrong
     model, tokenizer = initialize_model()
 
-    # 2. RUN INGESTION
-    # Parses the PDF and saves the JSON/Schema files to disk
     print("\n--- Running Ingestion Module ---")
     ingestion = IngestionPipeline(
         pdf_path=config.PDF_PATH,
@@ -72,13 +61,10 @@ def main():
         print("[!] Error: No data loaded from PDF. Exiting.")
         return
 
-    # 3. START GENERATOR
     print("\n--- Starting Generator Module ---")
     
-    # Initialize generator with the loaded model
     generator = SQLGenerator(model, tokenizer)
     
-    # Run evaluation using the data extracted by ingestion
     generator.run_pipeline(
         dataset=ingestion.dataset,
         schema_cache=ingestion.schema_cache,

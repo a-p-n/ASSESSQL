@@ -2,31 +2,21 @@ import os
 import re
 import json
 import unicodedata
-import fitz  # PyMuPDF
+import fitz
 import pytesseract
 from pdf2image import convert_from_path
 from PIL import Image, ImageFilter
 
 class IngestionPipeline:
     def __init__(self, pdf_path, output_dir):
-        """
-        Args:
-            pdf_path (str): Path to the Lab Manual PDF.
-            output_dir (str): Folder where the JSON and schema files will be saved.
-        """
         self.pdf_path = pdf_path
         self.output_dir = output_dir
         self.dataset = []
         self.schema_cache = {}
         
-        # Ensure output directories exist
         self.schema_output_dir = os.path.join(output_dir, "databases")
         os.makedirs(self.schema_output_dir, exist_ok=True)
 
-    # =========================================================
-    #  YOUR PARSING LOGIC (Preserved exactly as provided)
-    # =========================================================
-    
     def _sanitize_text(self, text):
         if not text: return text
         mapping = {
@@ -54,7 +44,6 @@ class IngestionPipeline:
             return None
 
         full_text = ""
-        # 1. Try Digital Extraction
         try:
             doc = fitz.open(pdf_path)
             for page in doc:
@@ -65,7 +54,6 @@ class IngestionPipeline:
         except Exception:
             pass 
 
-        # 2. Fallback to OCR
         print("[INFO] Digital extraction failed. Switching to OCR...")
         try:
             images = convert_from_path(pdf_path)
@@ -93,14 +81,12 @@ class IngestionPipeline:
             table_section = sections[0]
             query_section = sections[1] if len(sections) > 1 else ""
             
-            # Extract Queries
             queries = []
             q_matches = re.findall(r'(\d+\.\s+.*?)(?=\n\s*\d+\.|\Z)', query_section, re.DOTALL)
             for q in q_matches:
                 clean_q = re.sub(r'^\d+\.\s*', '', q.strip().replace('\n', ' '))
                 queries.append(clean_q)
                 
-            # Extract Tables
             tables = []
             lines = [l.strip() for l in table_section.split('\n') if l.strip()]
             i = 0
@@ -142,12 +128,7 @@ class IngestionPipeline:
             results.append({"question_id": q_id, "tables": tables, "queries": queries})
         return results
 
-    # =========================================================
-    #  NEW: INTEGRATION METHODS
-    # =========================================================
-
     def _convert_schema_to_sql(self, tables):
-        """Converts the JSON table structure into a SQL Create Table string."""
         sql_statements = []
         for table in tables:
             stmt = f"CREATE TABLE {table['table_name']} (\n"
@@ -162,15 +143,8 @@ class IngestionPipeline:
         return "\n\n".join(sql_statements)
 
     def run(self):
-        """
-        Executes the full ingestion process:
-        1. Read PDF -> Extract Text -> Parse to JSON
-        2. Save the main 'dataset' for the Generator
-        3. Save individual 'schema.sql' files for the Generator
-        """
         print(f"--- Ingestion: Processing {self.pdf_path} ---")
         
-        # 1. Parse PDF
         raw_text = self._extract_text_from_pdf(self.pdf_path)
         if not raw_text:
             print("[ERROR] No text extracted.")
@@ -178,14 +152,11 @@ class IngestionPipeline:
 
         structured_data = self._parse_lab_manual_to_json(raw_text)
         
-        # 2. Transform into Generator-ready format
-        # We need to map Question IDs to database IDs
         final_dataset = []
         
         for item in structured_data:
             db_id = f"question_{item['question_id']}"
             
-            # A. Save Schema File
             schema_sql = self._convert_schema_to_sql(item['tables'])
             db_folder = os.path.join(self.schema_output_dir, db_id)
             os.makedirs(db_folder, exist_ok=True)
@@ -193,20 +164,17 @@ class IngestionPipeline:
             with open(os.path.join(db_folder, "schema.sql"), "w") as f:
                 f.write(schema_sql)
             
-            # Cache it in memory for the pipeline
             self.schema_cache[db_id] = schema_sql
 
-            # B. Add to Dataset List
             for query in item['queries']:
                 final_dataset.append({
-                    "question": query,  # The natural language question
-                    "db_id": db_id,     # Link to the schema we just saved
-                    "query": "SELECT * FROM ...", # Placeholder: The PDF doesn't contain the GOLD SQL, usually?
+                    "question": query,
+                    "db_id": db_id,
+                    "query": "SELECT * FROM ...",
                 })
         
         self.dataset = final_dataset
         
-        # 3. Save Final JSON
         output_json_path = os.path.join(self.output_dir, "assessql_custom_dataset.json")
         with open(output_json_path, "w") as f:
             json.dump(final_dataset, f, indent=2)

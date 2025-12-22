@@ -173,7 +173,7 @@ class ASTComparator:
         gt_node_type = gt_node.get('node_type')
         
         if node_type == gt_node_type:
-            similarity = 0.8  # Base similarity for matching node types
+            similarity = 0.8
             if student_node.get('value') == gt_node.get('value'):
                 similarity = 1.0
             
