@@ -1,0 +1,6 @@
+--- TEST SCENARIO ---
+Query 1:	SELECT eno, ename FROM emp WHERE dept_no = 'D1'
+Query 2:	SELECT e.eno, ename FROM emp e
+Query 3:	from EMP f SELECT f.ENO, f.Ename where f.DEPT_NO = 'D1'
+SQL Processing Error for 'from EMP f SELECT f.ENO, f.Ename where f.DEPT_NO = 'D1'': Invalid SQL Syntax.
+Error parsing queries.

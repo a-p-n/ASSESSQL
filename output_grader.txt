@@ -1,0 +1,19 @@
+--- SCENARIO 1 ---
+Query : SELECT e1.eno, e1.ename, e2.eno, e2.ename, e1.dept_no FROM emp e1 INNER JOIN emp e2 ON e1.dept_no = e2.dept_no WHERE e1.eno <> e2.eno
+Result : {'matched_gt': 'SELECT e1.eno, e1.ename, e2.eno, e2.ename, e1.dept_no FROM emp e1 INNER JOIN emp e2 ON e1.dept_no = e2.dept_no WHERE e1.eno <> e2.eno;', 'obtained_marks': 8.0, 'total_marks': 8, 'percentage': 100.0, 'feedback': {'missing': [], 'extras': []}}
+
+--- SCENARIO 2 ---
+Query : SELECT e1.eno, e1.ename, e2.eno, e2.ename, e1.dept_no FROM emp e1 JOIN emp e2 ON e1.dept_no = e2.dept_no WHERE e1.eno <> e2.eno
+Result : {'matched_gt': 'SELECT e1.eno, e1.ename, e2.eno, e2.ename, e1.dept_no FROM emp e1 INNER JOIN emp e2 ON e1.dept_no = e2.dept_no WHERE e1.eno <> e2.eno;', 'obtained_marks': 8.0, 'total_marks': 8, 'percentage': 100.0, 'feedback': {'missing': [], 'extras': []}}
+
+--- SCENARIO 3 ---
+Query : SELECT e1.eno, e1.ename, e2.eno, e2.ename, e1.dept_no FROM emp e1, emp e2 WHERE e1.dept_no = e2.dept_no AND e1.eno <> e2.eno
+Result : {'matched_gt': 'SELECT e1.eno, e1.ename, e2.eno, e2.ename, e1.dept_no FROM emp e1 INNER JOIN emp e2 ON e1.dept_no = e2.dept_no WHERE e1.eno <> e2.eno;', 'obtained_marks': 8.0, 'total_marks': 8, 'percentage': 100.0, 'feedback': {'missing': [], 'extras': []}}
+
+--- SCENARIO 4 ---
+Query : SELECT e1.eno, e1.ename, e1.dept_no FROM emp e1 WHERE EXISTS (SELECT 1 FROM emp e2 WHERE e1.dept_no = e2.dept_no AND e1.eno <> e2.eno)
+Result : {'matched_gt': 'SELECT e1.eno, e1.ename, e1.dept_no FROM emp e1 WHERE EXISTS (SELECT 1 FROM emp e2 WHERE e1.dept_no = e2.dept_no AND e1.eno <> e2.eno);', 'obtained_marks': 8.0, 'total_marks': 8, 'percentage': 100.0, 'feedback': {'missing': [], 'extras': []}}
+
+--- SCENARIO 5 ---
+Query : SELECT eno, ename FROM emp WHERE dept_no = 'D1'
+Result : {'matched_gt': 'SELECT eno, ename, dept_no FROM emp WHERE dept_no IN (SELECT dept_no FROM emp GROUP BY dept_no HAVING COUNT(*) > 1);', 'obtained_marks': 2.5, 'total_marks': 7, 'percentage': 35.71, 'feedback': {'missing': ['SELECT:emp.dept_no AS dept_no', 'GROUP:emp.dept_no', 'FILTER:emp.dept_no IN (SELECT emp.dept_no AS dept_no FROM emp AS emp GROUP BY emp.dept_no HAVING COUNT(*) > 1)', 'HAVING:COUNT(*) > 1'], 'extras': ["FILTER:'D1' = emp.dept_no"]}}

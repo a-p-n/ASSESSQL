@@ -1,0 +1,244 @@
+
+Successfully extracted 5 Questions.
+
+==================== QUESTION 1 ====================
+
+[SCHEMA]
+{
+  "EMP": {
+    "eno": {
+      "type": "varchar",
+      "constraint": "PK"
+    },
+    "ename": {
+      "type": "varchar",
+      "constraint": "Not null"
+    },
+    "basic-sal": {
+      "type": "integer",
+      "constraint": "Default value 5000"
+    },
+    "incentive": {
+      "type": "integer",
+      "constraint": "Should not be greater than\nbasic_sal"
+    },
+    "dept_no": {
+      "type": "varchar",
+      "constraint": "Refers to dno of Dept table"
+    },
+    "mgr_id": {
+      "type": "varchar",
+      "constraint": "Refers to eno"
+    }
+  },
+  "DEPT": {
+    "dno": {
+      "type": "varchar",
+      "constraint": "PK"
+    },
+    "dname": {
+      "type": "varchar",
+      "constraint": "Not null"
+    },
+    "no. of emp": {
+      "type": "integer",
+      "constraint": ""
+    }
+  }
+}
+
+[QUERIES]
+  1. Add a column ‘JoiningDate’ to the emp table with the constraint that JoiningDate is not null.
+  2. Add a column HOD in DEPT table with proper referential integrity.
+  3. Find the eno of those employees who work in the dept with dept_no ‘D1’
+  4. Select all data from the DEPT table
+  5. Create a query to display the name, joining date, and employee number for each employee, with employee number appearing first.
+
+==================== QUESTION 2 ====================
+
+[SCHEMA]
+{
+  "STUDENT": {
+    "sno": {
+      "type": "varchar",
+      "constraint": "PK"
+    },
+    "sname": {
+      "type": "varchar",
+      "constraint": "Not null"
+    },
+    "age": {
+      "type": "integer",
+      "constraint": "Must be >0"
+    },
+    "gender": {
+      "type": "char",
+      "constraint": "Should contain 'M' or \u201cF as\nvalues"
+    }
+  },
+  "COURSE": {
+    "cno": {
+      "type": "varchar",
+      "constraint": "PK"
+    },
+    "cname": {
+      "type": "char(10)",
+      "constraint": "Notnull"
+    },
+    "credits": {
+      "type": "integer",
+      "constraint": ""
+    }
+  },
+  "STUDENT_COURSE": {
+    "sno": {
+      "type": "varchar",
+      "constraint": "Refers to sno of student\ntable"
+    },
+    "cno": {
+      "type": "varchar",
+      "constraint": "Refers to cno of Course table"
+    }
+  }
+}
+
+[QUERIES]
+  1. Change the datatype of cname to varchar.
+  2. Add a constraint to the column 'credits' of Course table so that the credit should be >0
+  3. Add two columns ‘dob’, ‘cgpa’ to Student table.
+  4. Delete column ‘age’ from Student table.
+  5. Retrieve the dob and Sno of the student(s) whose name is ‘Rahul’
+
+==================== QUESTION 3 ====================
+
+[SCHEMA]
+{
+  "SUPPLIER": {
+    "sno": {
+      "type": "varchar",
+      "constraint": "PK"
+    },
+    "sname": {
+      "type": "varchar",
+      "constraint": "Not null"
+    },
+    "city": {
+      "type": "varchar",
+      "constraint": ""
+    }
+  },
+  "PARTS": {
+    "pno": {
+      "type": "varchar",
+      "constraint": "PK"
+    },
+    "pname": {
+      "type": "varchar",
+      "constraint": "Should not be left blank"
+    },
+    "color": {
+      "type": "char(10)",
+      "constraint": ""
+    },
+    "weight": {
+      "type": "numeric",
+      "constraint": ""
+    }
+  },
+  "SUPPLIER_PARTS": {
+    "sno": {
+      "type": "varchar",
+      "constraint": "Refers to sno of Supplier\ntable"
+    },
+    "pno": {
+      "type": "varchar",
+      "constraint": "Refers to pno of Parts table"
+    },
+    "qty": {
+      "type": "numeric",
+      "constraint": "Should be >0"
+    }
+  }
+}
+
+[QUERIES]
+  1. Add a column 'date' to the Supplier_Parts table.
+  2. Change the name of table ‘Supplier_Parts’ to ‘Parts_Supplied’
+  3. Find the suppliers coming from the city which starts with letter 'T' and 'A' as the last character.
+  4. Delete table ‘Parts_Supplied’
+  5. Change the size of Sname column in Supplier table to 25.
+
+==================== QUESTION 4 ====================
+
+[SCHEMA]
+{
+  "PROGRAMMER": {
+    "pno": {
+      "type": "varchar",
+      "constraint": "PK"
+    },
+    "pname": {
+      "type": "varchar",
+      "constraint": "Not null"
+    },
+    "dob": {
+      "type": "date",
+      "constraint": "Not null"
+    },
+    "doj": {
+      "type": "date",
+      "constraint": "Must be > dob"
+    },
+    "gender": {
+      "type": "char",
+      "constraint": "Must contain 'M' or 'F'"
+    },
+    "sal": {
+      "type": "numeric",
+      "constraint": ""
+    }
+  },
+  "STUDIES": {
+    "pno": {
+      "type": "varchar",
+      "constraint": "Foreign key"
+    },
+    "study_place": {
+      "type": "varchar",
+      "constraint": "Not null"
+    },
+    "course": {
+      "type": "varchar",
+      "constraint": ""
+    },
+    "course_fee": {
+      "type": "numeric",
+      "constraint": ""
+    }
+  },
+  "SOFTWARE": {
+    "pno": {
+      "type": "varchar",
+      "constraint": "Foreign key"
+    },
+    "title": {
+      "type": "varchar",
+      "constraint": "Not null"
+    },
+    "development_cost": {
+      "type": "integer",
+      "constraint": "Not null"
+    },
+    "selling_cost": {
+      "type": "integer",
+      "constraint": "Must be >development_cost"
+    }
+  }
+}
+
+[QUERIES]
+  1. Add columns Sw_id and developed_in to the software table which should not left blank.
+  2. Add primary key on the Sw_id column.
+  3. Drop the constraint on the selling cost column.
+  4. Change the name of column ‘Doj’ to ‘hire_date’ in Programmer table
+  5. Add foreign key on the column Pname in Studies table that refers to Programmer table.
