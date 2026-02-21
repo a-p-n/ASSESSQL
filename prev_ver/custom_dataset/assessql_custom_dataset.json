@@ -1,0 +1,2930 @@
+[
+  {
+    "question": "How many heads of the departments are older than 56 ?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM HEAD WHERE AGE > 56",
+        "SELECT COUNT(head_ID) FROM HEAD WHERE AGE > 56",
+        "SELECT SUM(CASE WHEN AGE > 56 THEN 1 ELSE 0 END) FROM HEAD",
+        "SELECT COUNT(*) FROM HEAD WHERE NOT AGE <= 56"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT AGE FROM HEAD WHERE AGE > 56;",
+          "error_type": " RETURNS A LIST OF THE AGES"
+        },
+        {
+          "query": "SELECT * FROM HEAD WHERE AGE > 56;",
+          "error_type": "SELECTS ALL THE DATA"
+        },
+        {
+          "query": "SELECT COUNT(*) FROM HEAD WHERE AGE >= 56;",
+          "error_type": " INCLUDES THOSE WHO ARE EXACTLY 56 YEARS OLD"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the creation year, name and budget of each department.",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT CREATION, NAME, BUDGET_IN_BILLIONS FROM DEPARTMENT",
+        "SELECT T1.CREATION, T1.NAME, T1.BUDGET_IN_BILLIONS FROM DEPARTMENT AS T1",
+        "SELECT DEPARTMENT.CREATION, DEPARTMENT.NAME, DEPARTMENT.BUDGET_IN_BILLIONS FROM DEPARTMENT",
+        "SELECT CREATION, NAME, BUDGET_IN_BILLIONS FROM (SELECT * FROM DEPARTMENT)"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT * FROM DEPARTMENT",
+          "error_type": "RETRIEVES ALL COLUMNS"
+        },
+        {
+          "query": "SELECT CREATION, NAME, BUDGET FROM DEPARTMENT",
+          "error_type": "BUDGET DOES NOT EXIST IN THE DEPARTMENT TABLE"
+        },
+        {
+          "query": "SELECT T1.CREATION, T1.NAME, T1.BUDGET_IN_BILLIONS FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID",
+          "error_type": "DOESN'T REQUIRE ANY INFORMATION FROM THE MANAGEMENT TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the maximum and minimum budget of the departments?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT MAX(BUDGET_IN_BILLIONS), MIN(BUDGET_IN_BILLIONS) FROM DEPARTMENT",
+        "SELECT MAX(BUDGET_IN_BILLIONS) AS MAX_BUDGET, MIN(BUDGET_IN_BILLIONS) AS MIN_BUDGET FROM DEPARTMENT",
+        "SELECT MAX(T1.BUDGET_IN_BILLIONS), MIN(T1.BUDGET_IN_BILLIONS) FROM DEPARTMENT AS T1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT NAME, MAX(BUDGET_IN_BILLIONS), MIN(BUDGET_IN_BILLIONS) FROM DEPARTMENT",
+          "error_type": "CANNOT SELECT AN INDIVIDUAL COLUMN ALONGSIDE AGGREGATE FUNCTIONS "
+        },
+        {
+          "query": "SELECT BUDGET_IN_BILLIONS FROM DEPARTMENT WHERE BUDGET_IN_BILLIONS = MAX(BUDGET_IN_BILLIONS)",
+          "error_type": "USAGE OF AN AGGREGATE FUNCTION DIRECTLY WITHIN A WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT MAX(BUDGET_IN_BILLIONS) FROM DEPARTMENT",
+          "error_type": "ONLY RETURNS THE MAXIMUM BUDGET"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the average number of employees of the departments whose rank is between 10 and 15?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT AVG(NUM_EMPLOYEES) FROM DEPARTMENT WHERE RANKING BETWEEN 10 AND 15",
+        "SELECT AVG(NUM_EMPLOYEES) FROM DEPARTMENT WHERE RANKING >= 10 AND RANKING <= 15",
+        "SELECT AVG(T1.NUM_EMPLOYEES) FROM DEPARTMENT AS T1 WHERE T1.RANKING BETWEEN 10 AND 15"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT AVG(NUM_EMPLOYEES) FROM DEPARTMENT WHERE RANKING > 10 AND RANKING < 15",
+          "error_type": "EXCLUSIVE RANGE"
+        },
+        {
+          "query": "SELECT AVG(NUM_EMPLOYEES) FROM DEPARTMENT HAVING RANKING BETWEEN 10 AND 15",
+          "error_type": "HAVING CLAUSE IS USED TO FILTER RESULTS AFTER THEY HAVE BEEN GROUPED BY A GROUP BY CLAUSE INSTEAD OF WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT SUM(NUM_EMPLOYEES) FROM DEPARTMENT WHERE RANKING BETWEEN 10 AND 15",
+          "error_type": "CALCULATES SUM INSTEAD OF AVG"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the names of the heads who are born outside the California state?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT NAME FROM HEAD WHERE BORN_STATE != 'California'",
+        "SELECT NAME FROM HEAD WHERE BORN_STATE <> 'California'",
+        "SELECT NAME FROM HEAD WHERE BORN_STATE NOT IN ('California')",
+        "SELECT NAME FROM HEAD WHERE NOT BORN_STATE = 'California'",
+        "SELECT NAME FROM HEAD EXCEPT SELECT NAME FROM HEAD WHERE BORN_STATE = 'California'"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT NAME FROM HEAD WHERE BORN_STATE = 'CALIFORNIA'",
+          "error_type": "WRONG OPERATOR"
+        },
+        {
+          "query": "SELECT NAME FROM HEAD WHERE BORN_STATE != 'CALFORNIA'",
+          "error_type": "MISSPELLING THE STRING VALUE"
+        },
+        {
+          "query": "SELECT NAME FROM DEPARTMENT WHERE BORN_STATE != 'CALIFORNIA'",
+          "error_type": "WRONG TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the distinct creation years of the departments managed by a secretary born in state 'Alabama'?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT T1.CREATION FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T3.BORN_STATE = 'Alabama'",
+        "SELECT DISTINCT CREATION FROM DEPARTMENT, MANAGEMENT, HEAD WHERE DEPARTMENT.DEPARTMENT_ID = MANAGEMENT.DEPARTMENT_ID AND MANAGEMENT.HEAD_ID = HEAD.HEAD_ID AND HEAD.BORN_STATE = 'Alabama'",
+        "SELECT DISTINCT CREATION FROM DEPARTMENT WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID FROM MANAGEMENT WHERE HEAD_ID IN (SELECT HEAD_ID FROM HEAD WHERE BORN_STATE = 'Alabama'))",
+        "SELECT DISTINCT T1.CREATION FROM DEPARTMENT AS T1 WHERE EXISTS (SELECT 1 FROM MANAGEMENT AS T2 JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T2.DEPARTMENT_ID = T1.DEPARTMENT_ID AND T3.BORN_STATE = 'Alabama')"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.CREATION FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T3.BORN_STATE = 'ALABAMA'",
+          "error_type": "IF MULTIPLE DEPARTMENTS MANAGED BY HEADS FROM ALABAMA WERE FOUNDED IN THE SAME YEAR, THAT YEAR WOULD APPEAR MULTIPLE TIMES IN THE RESULT"
+        },
+        {
+          "query": "SELECT DISTINCT T1.CREATION FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T1.NAME = 'ALABAMA'",
+          "error_type": "FILTERING ON THE WRONG COLUMN"
+        },
+        {
+          "query": "SELECT DISTINCT T1.CREATION FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 WHERE T3.BORN_STATE = 'ALABAMA'",
+          "error_type": "MISSING JOIN CONDITION RESULTING IN CROSS JOIN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the names of the states where at least 3 heads were born?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT BORN_STATE FROM HEAD GROUP BY BORN_STATE HAVING COUNT(*) >= 3",
+        "SELECT BORN_STATE FROM HEAD GROUP BY BORN_STATE HAVING COUNT(HEAD_ID) >= 3",
+        "SELECT T.BORN_STATE FROM (SELECT BORN_STATE, COUNT(*) AS NUM_HEADS FROM HEAD GROUP BY BORN_STATE) AS T WHERE T.NUM_HEADS >= 3"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT BORN_STATE FROM HEAD WHERE COUNT(*) >= 3 GROUP BY BORN_STATE",
+          "error_type": "USING WHERE INSTEAD OF HAVING"
+        },
+        {
+          "query": "SELECT BORN_STATE FROM HEAD GROUP BY BORN_STATE HAVING COUNT(*) > 3",
+          "error_type": "INCORRECT LOGICAL OPERATOR"
+        },
+        {
+          "query": "SELECT BORN_STATE FROM HEAD HAVING COUNT(*) >= 3",
+          "error_type": "NO GROUP BY CLAUSE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "In which year were most departments established?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT CREATION FROM DEPARTMENT GROUP BY CREATION ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT CREATION FROM DEPARTMENT GROUP BY CREATION ORDER BY COUNT(DEPARTMENT_ID) DESC LIMIT 1",
+        "SELECT CREATION FROM DEPARTMENT GROUP BY CREATION HAVING COUNT(*) = (SELECT MAX(C) FROM (SELECT COUNT(*) AS C FROM DEPARTMENT GROUP BY CREATION))"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CREATION FROM DEPARTMENT GROUP BY CREATION ORDER BY COUNT(*) ASC LIMIT 1",
+          "error_type": "WRONG ORDERING"
+        },
+        {
+          "query": "SELECT CREATION FROM DEPARTMENT GROUP BY CREATION LIMIT 1",
+          "error_type": "ORDER BY CLAUSE MISSING"
+        },
+        {
+          "query": "SELECT MAX(CREATION) FROM DEPARTMENT",
+          "error_type": "WRONG USAGE OF MAX FUNCTION"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Show the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.NAME, T1.NUM_EMPLOYEES FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID WHERE T2.TEMPORARY_ACTING = 'Yes'",
+        "SELECT T1.NAME, T1.NUM_EMPLOYEES FROM DEPARTMENT AS T1, MANAGEMENT AS T2 WHERE T1.DEPARTMENT_ID = T2.DEPARTMENT_ID AND T2.TEMPORARY_ACTING = 'Yes'",
+        "SELECT NAME, NUM_EMPLOYEES FROM DEPARTMENT WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID FROM MANAGEMENT WHERE TEMPORARY_ACTING = 'Yes')",
+        "SELECT T1.NAME, T1.NUM_EMPLOYEES FROM DEPARTMENT AS T1 WHERE EXISTS (SELECT 1 FROM MANAGEMENT AS T2 WHERE T1.DEPARTMENT_ID = T2.DEPARTMENT_ID AND T2.TEMPORARY_ACTING = 'Yes')"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.NAME, T1.NUM_EMPLOYEES FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID WHERE T2.TEMPORARY_ACTING = 'NO'",
+          "error_type": "FILTERS FOR DEPARTMENTS WHERE THE TEMPORARY ACTING VALUE IS 'NO'"
+        },
+        {
+          "query": "SELECT T3.NAME, T1.NUM_EMPLOYEES FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T2.TEMPORARY_ACTING = 'YES'",
+          "error_type": "WRONG COLUMN SELECTED"
+        },
+        {
+          "query": "SELECT T1.NAME, T1.NUM_EMPLOYEES FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.HEAD_ID = T2.HEAD_ID WHERE T2.TEMPORARY_ACTING = 'YES'",
+          "error_type": "COLUMN HEAD_ID DOESN'T EXIST IN DEPARTMENT TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the name, born state and age of the heads of departments ordered by age.",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT NAME, BORN_STATE, AGE FROM HEAD ORDER BY AGE",
+        "SELECT NAME, BORN_STATE, AGE FROM HEAD ORDER BY AGE ASC",
+        "SELECT NAME, BORN_STATE, AGE FROM HEAD ORDER BY 3 ASC",
+        "SELECT T1.NAME, T1.BORN_STATE, T1.AGE FROM HEAD AS T1 ORDER BY T1.AGE"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT NAME, BORN_STATE, AGE FROM HEAD ORDER BY AGE DESC",
+          "error_type": "WRONG ORDERING"
+        },
+        {
+          "query": "SELECT NAME, BORN_STATE, AGE FROM HEAD ORDER BY NAME",
+          "error_type": "ORDERING BY WRONG COLUMN"
+        },
+        {
+          "query": "SELECT NAME, BORN_STATE, AGE FROM HEAD",
+          "error_type": "NO ORDER CLAUSE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many acting statuses are there?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(DISTINCT TEMPORARY_ACTING) FROM MANAGEMENT",
+        "SELECT COUNT(*) FROM (SELECT DISTINCT TEMPORARY_ACTING FROM MANAGEMENT)",
+        "SELECT COUNT(*) FROM (SELECT TEMPORARY_ACTING FROM MANAGEMENT GROUP BY TEMPORARY_ACTING)"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(TEMPORARY_ACTING) FROM MANAGEMENT",
+          "error_type": "COUNTS THE TOTAL NUMBER OF ROWS, NOT UNIQUE STATUSES"
+        },
+        {
+          "query": "SELECT DISTINCT TEMPORARY_ACTING FROM MANAGEMENT",
+          "error_type": "DOESN'T PROVIDE A COUNT"
+        },
+        {
+          "query": "SELECT COUNT(DISTINCT TEMPORARY_ACTING) FROM DEPARTMENT",
+          "error_type": "WRONG TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many departments are led by heads who are not mentioned?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM DEPARTMENT WHERE DEPARTMENT_ID NOT IN (SELECT DEPARTMENT_ID FROM MANAGEMENT)",
+        "SELECT COUNT(T1.DEPARTMENT_ID) FROM DEPARTMENT AS T1 LEFT JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID WHERE T2.DEPARTMENT_ID IS NULL",
+        "SELECT (SELECT COUNT(*) FROM DEPARTMENT) - (SELECT COUNT(DISTINCT DEPARTMENT_ID) FROM MANAGEMENT)",
+        "SELECT COUNT(*) FROM DEPARTMENT WHERE NOT EXISTS (SELECT 1 FROM MANAGEMENT WHERE MANAGEMENT.DEPARTMENT_ID = DEPARTMENT.DEPARTMENT_ID)"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM DEPARTMENT WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID FROM MANAGEMENT);",
+          "error_type": "COUNTS MANAGED DEPARTMENTS INSTEAD OF UNMANAGED"
+        },
+        {
+          "query": "SELECT COUNT(*) FROM DEPARTMENT AS T1 INNER JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID;",
+          "error_type": "COUNTS MANAGED DEPARTMENTS"
+        },
+        {
+          "query": "SELECT COUNT(T1.DEPARTMENT_ID) FROM DEPARTMENT AS T1 LEFT JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID WHERE T2.DEPARTMENT_ID IS NOT NULL;",
+          "error_type": "USAGE OF LEFT JOIN WITH WRONG FILTER"
+        },
+        {
+          "query": "SELECT NAME FROM DEPARTMENT WHERE DEPARTMENT_ID NOT IN (SELECT DEPARTMENT_ID FROM MANAGEMENT);",
+          "error_type": "RETURNS A LIST OF DEPARTMENTS INSTEAD OF COUNT"
+        },
+        {
+          "query": "SELECT COUNT(*) FROM HEAD WHERE HEAD_ID NOT IN (SELECT HEAD_ID FROM MANAGEMENT);",
+          "error_type": "WRONG TABLE"
+        },
+        {
+          "query": "SELECT COUNT(*) FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID  =  T2.DEPARTMENT_ID",
+          "error_type": "INCORRECTLY COUNTS THE NUMBER OF MANAGEMENT ASSIGNMENTS"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the distinct ages of the heads who are acting?",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT T1.AGE FROM HEAD AS T1 JOIN MANAGEMENT AS T2 ON T1.HEAD_ID = T2.HEAD_ID WHERE T2.TEMPORARY_ACTING = 'Yes'",
+        "SELECT DISTINCT T1.AGE FROM HEAD AS T1, MANAGEMENT AS T2 WHERE T1.HEAD_ID = T2.HEAD_ID AND T2.TEMPORARY_ACTING = 'Yes'",
+        "SELECT DISTINCT AGE FROM HEAD WHERE HEAD_ID IN (SELECT HEAD_ID FROM MANAGEMENT WHERE TEMPORARY_ACTING = 'Yes')",
+        "SELECT DISTINCT AGE FROM HEAD AS T1 WHERE EXISTS (SELECT 1 FROM MANAGEMENT AS T2 WHERE T1.HEAD_ID = T2.HEAD_ID AND T2.TEMPORARY_ACTING = 'Yes')"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.AGE FROM MANAGEMENT AS T2 JOIN HEAD AS T1 ON T1.HEAD_ID = T2.HEAD_ID WHERE T2.TEMPORARY_ACTING = 'YES';",
+          "error_type": " RETURN THE AGE FOR EVERY SINGLE ACTING HEAD"
+        },
+        {
+          "query": "SELECT DISTINCT T1.AGE FROM MANAGEMENT AS T2 JOIN HEAD AS T1 ON T1.HEAD_ID = T2.HEAD_ID;",
+          "error_type": "MISSING WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT DISTINCT T1.AGE FROM MANAGEMENT AS T2 JOIN HEAD AS T1 ON T1.HEAD_ID = T2.HEAD_ID WHERE T2.TEMPORARY_ACTING = 'NO';",
+          "error_type": "WRONG WHERE CLAUSE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the states where both the secretary of 'Treasury' department and the secretary of 'Homeland Security' were born.",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT T3.BORN_STATE FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T1.NAME = 'Treasury' INTERSECT SELECT T3.BORN_STATE FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T1.NAME = 'Homeland Security'",
+        "SELECT T3.BORN_STATE FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T1.NAME IN ('Treasury', 'Homeland Security') GROUP BY T3.BORN_STATE HAVING COUNT(DISTINCT T1.NAME) = 2",
+        "SELECT H1.BORN_STATE FROM HEAD H1 JOIN MANAGEMENT M1 ON H1.HEAD_ID = M1.HEAD_ID JOIN DEPARTMENT D1 ON M1.DEPARTMENT_ID = D1.DEPARTMENT_ID, HEAD H2 JOIN MANAGEMENT M2 ON H2.HEAD_ID = M2.HEAD_ID JOIN DEPARTMENT D2 ON M2.DEPARTMENT_ID = D2.DEPARTMENT_ID WHERE D1.NAME = 'Treasury' AND D2.NAME = 'Homeland Security' AND H1.BORN_STATE = H2.BORN_STATE",
+        "SELECT BORN_STATE FROM HEAD WHERE HEAD_ID IN (SELECT HEAD_ID FROM MANAGEMENT WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID FROM DEPARTMENT WHERE NAME = 'Treasury')) AND BORN_STATE IN (SELECT BORN_STATE FROM HEAD WHERE HEAD_ID IN (SELECT HEAD_ID FROM MANAGEMENT WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID FROM DEPARTMENT WHERE NAME = 'Homeland Security')))"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT DISTINCT T3.BORN_STATE FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T1.NAME = 'TREASURY' OR T1.NAME = 'HOMELAND SECURITY';",
+          "error_type": "RETURNS THE UNION OF THE TWO SETS OF STATES, NOT THE INTERSECTION"
+        },
+        {
+          "query": "SELECT T3.BORN_STATE FROM DEPARTMENT AS T1 JOIN MANAGEMENT AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID JOIN HEAD AS T3 ON T2.HEAD_ID = T3.HEAD_ID WHERE T1.NAME IN ('TREASURY', 'HOMELAND SECURITY') GROUP BY T3.BORN_STATE HAVING COUNT(*) = 2;",
+          "error_type": "INCORRECT HAVING CONDITION"
+        },
+        {
+          "query": "SELECT BORN_STATE FROM HEAD GROUP BY BORN_STATE HAVING COUNT(*) >= 2;",
+          "error_type": "RETURNS STATES THAT ARE HOME TO AT LEAST TWO DIFFERENT HEADS"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Which department has more than 1 head at a time? List the id, name and the number of heads.",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.DEPARTMENT_ID, T1.NAME, COUNT(*) FROM MANAGEMENT AS T2 JOIN DEPARTMENT AS T1 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID GROUP BY T1.DEPARTMENT_ID HAVING COUNT(*) > 1",
+        "SELECT T1.DEPARTMENT_ID, T1.NAME, COUNT(T2.HEAD_ID) FROM DEPARTMENT AS T1, MANAGEMENT AS T2 WHERE T1.DEPARTMENT_ID = T2.DEPARTMENT_ID GROUP BY T1.DEPARTMENT_ID HAVING COUNT(T2.HEAD_ID) > 1",
+        "SELECT T1.DEPARTMENT_ID, T1.NAME, T2.NUM_HEADS FROM DEPARTMENT AS T1 JOIN (SELECT DEPARTMENT_ID, COUNT(*) AS NUM_HEADS FROM MANAGEMENT GROUP BY DEPARTMENT_ID HAVING COUNT(*) > 1) AS T2 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID",
+        "SELECT DEPARTMENT_ID, NAME, (SELECT COUNT(*) FROM MANAGEMENT WHERE MANAGEMENT.DEPARTMENT_ID = DEPARTMENT.DEPARTMENT_ID) AS CNT FROM DEPARTMENT WHERE (SELECT COUNT(*) FROM MANAGEMENT WHERE MANAGEMENT.DEPARTMENT_ID = DEPARTMENT.DEPARTMENT_ID) > 1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.DEPARTMENT_ID, T1.NAME, COUNT(*) FROM MANAGEMENT AS T2 JOIN DEPARTMENT AS T1 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID WHERE COUNT(*) > 1 GROUP BY T1.DEPARTMENT_ID, T1.NAME;",
+          "error_type": "CANNOT USE AN AGGREGATE FUNCTION LIKE COUNT(*) IN A WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT T1.DEPARTMENT_ID, T1.NAME, COUNT(*) FROM MANAGEMENT AS T2 JOIN DEPARTMENT AS T1 ON T1.DEPARTMENT_ID = T2.DEPARTMENT_ID GROUP BY T1.DEPARTMENT_ID, T1.NAME HAVING COUNT(*) >= 1;",
+          "error_type": "RETURN ALL DEPARTMENTS THAT HAVE AT LEAST ONE HEAD"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Which head's name has the substring 'Ha'? List the id and name.",
+    "db_id": "department_management",
+    "queries": {
+      "correct_queries": [
+        "SELECT HEAD_ID, NAME FROM HEAD WHERE NAME LIKE '%Ha%'",
+        "SELECT HEAD_ID, NAME FROM HEAD WHERE INSTR(NAME, 'Ha') > 0",
+        "SELECT HEAD_ID, NAME FROM HEAD WHERE NOT NAME NOT LIKE '%Ha%'"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT HEAD_ID, NAME FROM HEAD WHERE NAME = '%HA%';",
+          "error_type": "USED '=' INSTEAD OF LIKE"
+        },
+        {
+          "query": "SELECT HEAD_ID, NAME FROM HEAD WHERE NAME LIKE 'HA%';",
+          "error_type": "ONLY FIND NAMES THAT START WITH 'HA'"
+        },
+        {
+          "query": "SELECT HEAD_ID, NAME FROM HEAD WHERE NAME LIKE 'HA';",
+          "error_type": "USAGE OF LIKE OPERATOR WITHOUT ANY WILDCARDS (% OR _)"
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many farms are there?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM FARM",
+        "SELECT COUNT(FARM_ID) FROM FARM",
+        "SELECT SUM(1) FROM FARM"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT * FROM FARM;",
+          "error_type": "RETURNS ALL THE DATA IN THE FARM TABLE INSTEAD OF THE COUNT OF FARMS"
+        },
+        {
+          "query": "SELECT COUNT(DISTINCT YEAR) FROM FARM;",
+          "error_type": "COUNTING DISTINCT VALUES"
+        },
+        {
+          "query": "SELECT COUNT(*) FROM COMPETITION_RECORD;",
+          "error_type": "WRONG TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Count the number of farms.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM FARM",
+        "SELECT COUNT(FARM_ID) FROM FARM",
+        "SELECT SUM(1) FROM FARM"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(DISTINCT YEAR) FROM FARM;",
+          "error_type": "COUNTING DISTINCT VALUES"
+        },
+        {
+          "query": "SELECT * FROM FARM;",
+          "error_type": "RETURNS ALL THE DATA IN THE FARM TABLE INSTEAD OF THE COUNT OF FARMS"
+        },
+        {
+          "query": "SELECT COUNT(*) FROM COMPETITION_RECORD;",
+          "error_type": "WRONG TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the total number of horses on farms in ascending order.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT TOTAL_HORSES FROM FARM ORDER BY TOTAL_HORSES ASC",
+        "SELECT TOTAL_HORSES FROM FARM ORDER BY TOTAL_HORSES",
+        "SELECT TOTAL_HORSES FROM FARM ORDER BY 1 ASC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT TOTAL_HORSES FROM FARM ORDER BY TOTAL_HORSES DESC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT SUM(TOTAL_HORSES) FROM FARM;",
+          "error_type": "RETURN SUM INSTEAD OF LIST OF VALUES"
+        },
+        {
+          "query": "SELECT TOTAL_HORSES FROM FARM;",
+          "error_type": "WRONG ORDER"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the total horses record for each farm, sorted ascending?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT TOTAL_HORSES FROM FARM ORDER BY TOTAL_HORSES ASC",
+        "SELECT TOTAL_HORSES FROM FARM ORDER BY TOTAL_HORSES",
+        "SELECT TOTAL_HORSES FROM FARM ORDER BY 1 ASC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT TOTAL_HORSES FROM FARM ORDER BY TOTAL_HORSES DESC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT SUM(TOTAL_HORSES) FROM FARM;",
+          "error_type": "RETURN SUM INSTEAD OF LIST OF VALUES"
+        },
+        {
+          "query": "SELECT TOTAL_HORSES FROM FARM;",
+          "error_type": "WRONG ORDER"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the hosts of competitions whose theme is not \"Aliens\"?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME != 'Aliens'",
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME <> 'Aliens'",
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME NOT IN ('Aliens')",
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE NOT THEME = 'Aliens'",
+        "SELECT HOSTS FROM FARM_COMPETITION EXCEPT SELECT HOSTS FROM FARM_COMPETITION WHERE THEME = 'Aliens'"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME = 'ALIENS';",
+          "error_type": "WRONG OPERATOR"
+        },
+        {
+          "query": "SELECT HOSTS FROM FARM_COMPETITION;",
+          "error_type": "MISSING WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION WHERE THEME <> 'ALIENS';",
+          "error_type": "WRONG COLUMN SELECTED"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Return the hosts of competitions for which the theme is not Aliens?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME != 'Aliens'",
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME <> 'Aliens'",
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME NOT IN ('Aliens')",
+        "SELECT HOSTS FROM FARM_COMPETITION WHERE NOT THEME = 'Aliens'"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT HOSTS FROM FARM_COMPETITION WHERE THEME = 'ALIENS';",
+          "error_type": "WRONG OPERATOR"
+        },
+        {
+          "query": "SELECT HOSTS FROM FARM_COMPETITION;",
+          "error_type": "MISSING WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION WHERE THEME <> 'ALIENS';",
+          "error_type": "WRONG COLUMN SELECTED"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the themes of farm competitions sorted by year in ascending order?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT THEME FROM FARM_COMPETITION ORDER BY YEAR ASC",
+        "SELECT THEME FROM FARM_COMPETITION ORDER BY YEAR",
+        "SELECT FC.THEME FROM FARM_COMPETITION AS FC ORDER BY FC.YEAR ASC",
+        "SELECT THEME FROM FARM_COMPETITION ORDER BY 2 ASC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION ORDER BY YEAR DESC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION ORDER BY THEME;",
+          "error_type": "WRONG COLUMN"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION GROUP BY THEME;",
+          "error_type": "USAGE OF GROUP BY INSTEAD OF ORDER BY"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Return the themes of farm competitions, sorted by year ascending.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT THEME FROM FARM_COMPETITION ORDER BY YEAR ASC",
+        "SELECT THEME FROM FARM_COMPETITION ORDER BY YEAR",
+        "SELECT FC.THEME FROM FARM_COMPETITION AS FC ORDER BY FC.YEAR ASC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION ORDER BY YEAR DESC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION ORDER BY THEME;",
+          "error_type": "ORDERING BY WRONG COLUMN"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION;",
+          "error_type": "MISSING ORDER BY CLAUSE"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION GROUP BY THEME;",
+          "error_type": "USAGE OF GROUP BY INSTEAD OF ORDER BY"
+        },
+        {
+          "query": "SELECT YEAR FROM FARM_COMPETITION ORDER BY YEAR ASC;",
+          "error_type": "WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the average number of working horses of farms with more than 5000 total number of horses?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT AVG(WORKING_HORSES) FROM FARM WHERE TOTAL_HORSES > 5000",
+        "SELECT SUM(WORKING_HORSES) * 1.0 / COUNT(WORKING_HORSES) FROM FARM WHERE TOTAL_HORSES > 5000",
+        "SELECT AVG(T1.WORKING_HORSES) FROM FARM AS T1 WHERE T1.TOTAL_HORSES > 5000"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT AVG(WORKING_HORSES) FROM FARM WHERE TOTAL_HORSES >= 5000;",
+          "error_type": "INCORRET LOGICAL CONDITION"
+        },
+        {
+          "query": "SELECT AVG(WORKING_HORSES) FROM FARM HAVING TOTAL_HORSES > 5000;",
+          "error_type": "WRONG USAGE OF HAVING CLAUSE"
+        },
+        {
+          "query": "SELECT AVG(TOTAL_HORSES) FROM FARM WHERE TOTAL_HORSES > 5000;",
+          "error_type": "CALCULATES AVG OF WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Give the average number of working horses on farms with more than 5000 total horses.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT AVG(WORKING_HORSES) FROM FARM WHERE TOTAL_HORSES > 5000",
+        "SELECT SUM(WORKING_HORSES) * 1.0 / COUNT(WORKING_HORSES) FROM FARM WHERE TOTAL_HORSES > 5000",
+        "SELECT AVG(T1.WORKING_HORSES) FROM FARM AS T1 WHERE T1.TOTAL_HORSES > 5000"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT AVG(WORKING_HORSES) FROM FARM WHERE TOTAL_HORSES >= 5000;",
+          "error_type": "INCORRET LOGICAL CONDITION"
+        },
+        {
+          "query": "SELECT AVG(WORKING_HORSES) FROM FARM HAVING TOTAL_HORSES > 5000;",
+          "error_type": "WRONG USAGE OF HAVING CLAUSE"
+        },
+        {
+          "query": "SELECT AVG(TOTAL_HORSES) FROM FARM WHERE TOTAL_HORSES > 5000;",
+          "error_type": "CALCULATES AVG OF WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the maximum and minimum number of cows across all farms.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT MAX(COWS), MIN(COWS) FROM FARM",
+        "SELECT MAX(COWS) AS MAX_COWS, MIN(COWS) AS MIN_COWS FROM FARM",
+        "SELECT MAX(T1.COWS), MIN(T1.COWS) FROM FARM AS T1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT MAX(COWS) FROM FARM;",
+          "error_type": "ONLY RETURNS THE MAXIMUM NUMBER OF COWS"
+        },
+        {
+          "query": "SELECT FARM_ID, MAX(COWS), MIN(COWS) FROM FARM;",
+          "error_type": "CANNOT SELECT A NON-AGGREGATED COLUMN ALONGSIDE AGGREGATE FUNCTIONS "
+        },
+        {
+          "query": "SELECT COWS FROM FARM WHERE COWS = MAX(COWS);",
+          "error_type": "INCORRECT USE OF AGGREGATE FUNCTION"
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many different statuses do cities have?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(DISTINCT STATUS) FROM CITY",
+        "SELECT COUNT(*) FROM (SELECT DISTINCT STATUS FROM CITY)",
+        "SELECT COUNT(*) FROM (SELECT STATUS FROM CITY GROUP BY STATUS)"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(STATUS) FROM CITY;",
+          "error_type": "RETURNS TOTAL NUMBER OF NON-DISTINCT ROWS"
+        },
+        {
+          "query": "SELECT DISTINCT STATUS FROM CITY;",
+          "error_type": "RETURN VALUES INSTEAD OF COUNT"
+        },
+        {
+          "query": "SELECT COUNT(STATUS) FROM CITY GROUP BY STATUS;",
+          "error_type": "WRONG USAGE OF GROUP BY"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List official names of cities in descending order of population.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT OFFICIAL_NAME FROM CITY ORDER BY POPULATION DESC",
+        "SELECT C.OFFICIAL_NAME FROM CITY AS C ORDER BY C.POPULATION DESC",
+        "SELECT OFFICIAL_NAME FROM CITY ORDER BY 1 DESC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY ORDER BY POPULATION ASC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY ORDER BY OFFICIAL_NAME DESC;",
+          "error_type": "ORDERED WRONG COLUMN"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY;",
+          "error_type": "MISSING ORDER BY CLAUSE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the official names of cities, ordered descending by population?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT OFFICIAL_NAME FROM CITY ORDER BY POPULATION DESC",
+        "SELECT C.OFFICIAL_NAME FROM CITY AS C ORDER BY C.POPULATION DESC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY ORDER BY POPULATION ASC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY ORDER BY OFFICIAL_NAME DESC;",
+          "error_type": "ORDERED WITH WRONG COLUMN"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY;",
+          "error_type": "MISSING ORDER BY CLAUSE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the official name and status of the city with the largest population.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT OFFICIAL_NAME, STATUS FROM CITY ORDER BY POPULATION DESC LIMIT 1",
+        "SELECT OFFICIAL_NAME, STATUS FROM CITY WHERE POPULATION = (SELECT MAX(POPULATION) FROM CITY)",
+        "SELECT T1.OFFICIAL_NAME, T1.STATUS FROM CITY AS T1 ORDER BY T1.POPULATION DESC LIMIT 1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT OFFICIAL_NAME, STATUS FROM CITY ORDER BY POPULATION ASC LIMIT 1;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME, STATUS FROM CITY ORDER BY POPULATION DESC;",
+          "error_type": "RETURNS LIST OF ALL CITIES"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME, STATUS, MAX(POPULATION) FROM CITY;",
+          "error_type": "WRONG USAGE OF MAX"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the official name and status of the city with the most residents?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT OFFICIAL_NAME, STATUS FROM CITY ORDER BY POPULATION DESC LIMIT 1",
+        "SELECT OFFICIAL_NAME, STATUS FROM CITY WHERE POPULATION = (SELECT MAX(POPULATION) FROM CITY)",
+        "SELECT OFFICIAL_NAME, STATUS FROM CITY ORDER BY POPULATION DESC FETCH FIRST 1 ROW ONLY"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT OFFICIAL_NAME, STATUS FROM CITY ORDER BY POPULATION ASC LIMIT 1;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME, STATUS FROM CITY ORDER BY POPULATION DESC;",
+          "error_type": "MISSING LIMIT CLAUSE"
+        },
+        {
+          "query": "SELECT OFFICIAL_NAME, STATUS, MAX(POPULATION) FROM CITY;",
+          "error_type": "INCORRECT USE OF MAX ARGUMENT"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Show the years and the official names of the host cities of competitions.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID",
+        "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID",
+        "SELECT T1.YEAR, T2.OFFICIAL_NAME FROM FARM_COMPETITION AS T1 JOIN CITY AS T2 ON T1.HOST_CITY_ID = T2.CITY_ID",
+        "SELECT T1.YEAR, (SELECT T2.OFFICIAL_NAME FROM CITY AS T2 WHERE T2.CITY_ID = T1.HOST_CITY_ID) AS CITY_NAME FROM FARM_COMPETITION AS T1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1 LEFT JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID;",
+          "error_type": "LISTS ALL THE CITIES"
+        },
+        {
+          "query": "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.COMPETITION_ID;",
+          "error_type": "USAGE OF JOIN ON WRONG COLUMNS"
+        },
+        {
+          "query": "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1, FARM_COMPETITION AS T2;",
+          "error_type": "MISSING JOIN CONDITION"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Give the years and official names of the cities of each competition.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID",
+        "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID",
+        "SELECT T1.YEAR, T2.OFFICIAL_NAME FROM FARM_COMPETITION AS T1 JOIN CITY AS T2 ON T1.HOST_CITY_ID = T2.CITY_ID",
+        "SELECT T1.YEAR, (SELECT T2.OFFICIAL_NAME FROM CITY AS T2 WHERE T2.CITY_ID = T1.HOST_CITY_ID) AS CITY_NAME FROM FARM_COMPETITION AS T1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1 LEFT JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID;",
+          "error_type": "LISTS ALL THE CITIES"
+        },
+        {
+          "query": "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.COMPETITION_ID;",
+          "error_type": "USAGE OF JOIN ON WRONG COLUMNS"
+        },
+        {
+          "query": "SELECT T2.YEAR, T1.OFFICIAL_NAME FROM CITY AS T1, FARM_COMPETITION AS T2;",
+          "error_type": "MISSING JOIN CONDITION"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Return the maximum and minimum number of cows across all farms.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT MAX(COWS), MIN(COWS) FROM FARM",
+        "SELECT MAX(COWS) AS MAX_COWS, MIN(COWS) AS MIN_COWS FROM FARM",
+        "SELECT MAX(T1.COWS), MIN(T1.COWS) FROM FARM AS T1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT MAX(COWS) FROM FARM;",
+          "error_type": "ONLY RETURNS THE MAXIMUM NUMBER OF COWS"
+        },
+        {
+          "query": "SELECT FARM_ID, MAX(COWS), MIN(COWS) FROM FARM;",
+          "error_type": "CAN'T SELECT A NON-AGGREGATED COLUMN ALONGSIDE AGGREGATE FUNCTION"
+        },
+        {
+          "query": "SELECT COWS FROM FARM WHERE COWS = MAX(COWS);",
+          "error_type": "INCORRECT USE OF MAX FUNCTION"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Count the number of different statuses.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(DISTINCT STATUS) FROM CITY",
+        "SELECT COUNT(*) FROM (SELECT DISTINCT STATUS FROM CITY)",
+        "SELECT COUNT(*) FROM (SELECT STATUS FROM CITY GROUP BY STATUS)"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(STATUS) FROM CITY;",
+          "error_type": "COUNTS THE TOTAL NUMBER OF ROWS"
+        },
+        {
+          "query": "SELECT DISTINCT STATUS FROM CITY;",
+          "error_type": "RETURN VALUES INSTEAD OF A COUNT"
+        },
+        {
+          "query": "SELECT COUNT(STATUS) FROM CITY GROUP BY STATUS;",
+          "error_type": "INCORRECT USE OF GROUP BY CLAUSE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Show the official names of the cities that have hosted more than one competition.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID HAVING COUNT(*) > 1",
+        "SELECT OFFICIAL_NAME FROM CITY WHERE CITY_ID IN (SELECT HOST_CITY_ID FROM FARM_COMPETITION GROUP BY HOST_CITY_ID HAVING COUNT(*) > 1)",
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID HAVING COUNT(*) > 1",
+        "SELECT OFFICIAL_NAME FROM CITY AS C WHERE (SELECT COUNT(*) FROM FARM_COMPETITION AS FC WHERE FC.HOST_CITY_ID = C.CITY_ID) > 1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE COUNT(*) > 1 GROUP BY T2.HOST_CITY_ID;",
+          "error_type": "CAN'T USE AN AGGREGATE FUNCTION WITH A WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID HAVING COUNT(*) >= 1;",
+          "error_type": "WRONG LOGICAL OPERATOR"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the official names of cities that have hosted more than one competition?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID HAVING COUNT(*) > 1",
+        "SELECT OFFICIAL_NAME FROM CITY WHERE CITY_ID IN (SELECT HOST_CITY_ID FROM FARM_COMPETITION GROUP BY HOST_CITY_ID HAVING COUNT(*) > 1)",
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID HAVING COUNT(*) > 1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE COUNT(*) > 1 GROUP BY T2.HOST_CITY_ID;",
+          "error_type": "CAN'T USE AN AGGREGATE FUNCTION IN A WHERE CLAUSE"
+        },
+        {
+          "query": "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID HAVING COUNT(*) >= 1;",
+          "error_type": "WRONG LOGICAL OPERATOR"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Show the status of the city that has hosted the greatest number of competitions.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT STATUS FROM CITY WHERE CITY_ID = (SELECT HOST_CITY_ID FROM FARM_COMPETITION GROUP BY HOST_CITY_ID ORDER BY COUNT(*) DESC LIMIT 1)",
+        "SELECT T1.STATUS FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) DESC LIMIT 1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T1.STATUS ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "GROUPING BY WRONG COLUMN"
+        },
+        {
+          "query": "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) DESC;",
+          "error_type": "RETURNS A LIST OF STATUSES FOR ALL HOST CITIES, NOT THE SINGLE STATUS OF THE TOP CITY"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the status of the city that has hosted the most competitions?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT STATUS FROM CITY WHERE CITY_ID = (SELECT HOST_CITY_ID FROM FARM_COMPETITION GROUP BY HOST_CITY_ID ORDER BY COUNT(*) DESC LIMIT 1)",
+        "SELECT T1.STATUS FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) DESC LIMIT 1"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T1.STATUS ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "GROUPING BY THE WRONG COLUMN"
+        },
+        {
+          "query": "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT T1.STATUS FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID GROUP BY T2.HOST_CITY_ID ORDER BY COUNT(*) DESC;",
+          "error_type": "RETURNS A LIST OF STATUSES FOR ALL HOST CITIES, NOT THE SINGLE STATUS OF THE TOP CITY"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Please show the themes of competitions with host cities having populations larger than 1000.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T2.THEME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T1.POPULATION > 1000",
+        "SELECT THEME FROM FARM_COMPETITION WHERE HOST_CITY_ID IN (SELECT CITY_ID FROM CITY WHERE POPULATION > 1000)",
+        "SELECT T1.THEME FROM FARM_COMPETITION AS T1 WHERE EXISTS (SELECT 1 FROM CITY AS T2 WHERE T1.HOST_CITY_ID = T2.CITY_ID AND T2.POPULATION > 1000)",
+        "SELECT T2.THEME FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID AND T1.POPULATION > 1000"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T2.THEME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T1.POPULATION < 1000;",
+          "error_type": "WRONG LOGICAL CONDITION"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION WHERE POPULATION > 1000;",
+          "error_type": "COLUMN DOESN'T EXIT"
+        },
+        {
+          "query": "SELECT T2.THEME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T1.AREA_KM_2 > 1000;",
+          "error_type": "FILTERING THE WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the themes of competitions that have corresponding host cities with more than 1000 residents?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT T2.THEME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T1.POPULATION > 1000",
+        "SELECT THEME FROM FARM_COMPETITION WHERE HOST_CITY_ID IN (SELECT CITY_ID FROM CITY WHERE POPULATION > 1000)",
+        "SELECT T1.THEME FROM FARM_COMPETITION AS T1 WHERE EXISTS (SELECT 1 FROM CITY AS T2 WHERE T1.HOST_CITY_ID = T2.CITY_ID AND T2.POPULATION > 1000)",
+        "SELECT T2.THEME FROM CITY AS T1, FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID AND T1.POPULATION > 1000"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T2.THEME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T1.POPULATION < 1000;",
+          "error_type": "WRONG LOGICAL CONDITION"
+        },
+        {
+          "query": "SELECT THEME FROM FARM_COMPETITION WHERE POPULATION > 1000;",
+          "error_type": "COLUMN DOESN'T EXIST"
+        },
+        {
+          "query": "SELECT T2.THEME FROM CITY AS T1 JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T1.AREA_KM_2 > 1000;",
+          "error_type": "FILTERING ON THE WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Please show the different statuses of cities and the average population of cities with each status.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT STATUS, AVG(POPULATION) FROM CITY GROUP BY STATUS",
+        "SELECT DISTINCT STATUS, AVG(POPULATION) OVER (PARTITION BY STATUS) FROM CITY",
+        "SELECT T1.STATUS, AVG(T1.POPULATION) FROM CITY AS T1 GROUP BY T1.STATUS"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STATUS, AVG(POPULATION) FROM CITY;",
+          "error_type": "CANNOT SELECT A REGULAR COLUMN ALONGSIDE AN AGGREGATE FUNCTION WITHOUT TELLING THE DATABASE HOW TO GROUP THE ROWS FIRST USING A GROUP BY CLAUSE"
+        },
+        {
+          "query": "SELECT STATUS, COUNT(POPULATION) FROM CITY GROUP BY STATUS;",
+          "error_type": "WRONG AGGREGATE FUNCTION"
+        },
+        {
+          "query": "SELECT STATUS, AVG(POPULATION) FROM CITY GROUP BY OFFICIAL_NAME;",
+          "error_type": "GROUPING BY WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the statuses and average populations of each city?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT STATUS, AVG(POPULATION) FROM CITY GROUP BY STATUS",
+        "SELECT DISTINCT STATUS, AVG(POPULATION) OVER (PARTITION BY STATUS) FROM CITY",
+        "SELECT T1.STATUS, AVG(T1.POPULATION) FROM CITY AS T1 GROUP BY T1.STATUS"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STATUS, AVG(POPULATION) FROM CITY;",
+          "error_type": "CANNOT SELECT A REGULAR COLUMN ALONGSIDE AN AGGREGATE FUNCTION WITHOUT TELLING THE DATABASE HOW TO GROUP THE ROWS FIRST USING A GROUP BY CLAUSE"
+        },
+        {
+          "query": "SELECT STATUS, COUNT(POPULATION) FROM CITY GROUP BY STATUS;",
+          "error_type": "WRONG AGGREGATE FUNCTION"
+        },
+        {
+          "query": "SELECT STATUS, AVG(POPULATION) FROM CITY GROUP BY OFFICIAL_NAME;",
+          "error_type": "GROUPING BY THE WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Please show the different statuses, ordered by the number of cities that have each.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) ASC",
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*)",
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(CITY_ID) ASC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) DESC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS;",
+          "error_type": "WRONG OREDER"
+        },
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY STATUS ASC;",
+          "error_type": "ORDERED BY WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Return the different statuses of cities, ascending by frequency.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) ASC",
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*)",
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(CITY_ID) ASC"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) DESC;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY STATUS ASC;",
+          "error_type": "ORDERED BY WRONG COLUMN"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the most common type of Status across cities.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) DESC FETCH FIRST 1 ROW ONLY",
+        "SELECT STATUS FROM CITY GROUP BY STATUS HAVING COUNT(*) = (SELECT MAX(C) FROM (SELECT COUNT(*) AS C FROM CITY GROUP BY STATUS))"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS LIMIT 1;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT MAX(STATUS) FROM CITY;",
+          "error_type": "WRONG USE OF MAX FUNCTION"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the most common status across all cities?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) DESC FETCH FIRST 1 ROW ONLY",
+        "SELECT STATUS FROM CITY GROUP BY STATUS HAVING COUNT(*) = (SELECT MAX(C) FROM (SELECT COUNT(*) AS C FROM CITY GROUP BY STATUS))"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "WRONG ORER"
+        },
+        {
+          "query": "SELECT STATUS FROM CITY GROUP BY STATUS LIMIT 1;",
+          "error_type": "WRONG ORDER"
+        },
+        {
+          "query": "SELECT MAX(STATUS) FROM CITY;",
+          "error_type": "WRONG USE OF MAX FUNCTION"
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the official names of cities that have not held any competition.",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT OFFICIAL_NAME FROM CITY WHERE CITY_ID NOT IN (SELECT HOST_CITY_ID FROM FARM_COMPETITION)",
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 LEFT JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T2.HOST_CITY_ID IS NULL",
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 WHERE NOT EXISTS (SELECT 1 FROM FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID)",
+        "SELECT OFFICIAL_NAME FROM CITY EXCEPT SELECT OFFICIAL_NAME FROM CITY JOIN FARM_COMPETITION ON CITY.CITY_ID = FARM_COMPETITION.HOST_CITY_ID"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY WHERE CITY_ID IN (SELECT HOST_CITY_ID FROM FARM_COMPETITION);",
+          "error_type": "MISSING 'NOT' KEYWORD"
+        },
+        {
+          "query": "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 LEFT JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T2.HOST_CITY_ID IS NOT NULL;",
+          "error_type": "JOIN USED ON THE WRONG FILTER"
+        },
+        {
+          "query": "SELECT FARM_ID FROM FARM WHERE FARM_ID NOT IN (SELECT FARM_ID FROM COMPETITION_RECORD);",
+          "error_type": "WRONG TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the official names of cities that have not hosted a farm competition?",
+    "db_id": "farm",
+    "queries": {
+      "correct_queries": [
+        "SELECT OFFICIAL_NAME FROM CITY WHERE CITY_ID NOT IN (SELECT HOST_CITY_ID FROM FARM_COMPETITION)",
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 LEFT JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T2.HOST_CITY_ID IS NULL",
+        "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 WHERE NOT EXISTS (SELECT 1 FROM FARM_COMPETITION AS T2 WHERE T1.CITY_ID = T2.HOST_CITY_ID)",
+        "SELECT OFFICIAL_NAME FROM CITY EXCEPT SELECT OFFICIAL_NAME FROM CITY JOIN FARM_COMPETITION ON CITY.CITY_ID = FARM_COMPETITION.HOST_CITY_ID"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT OFFICIAL_NAME FROM CITY WHERE CITY_ID IN (SELECT HOST_CITY_ID FROM FARM_COMPETITION);",
+          "error_type": "MISSING 'NOT' KEYWORD"
+        },
+        {
+          "query": "SELECT T1.OFFICIAL_NAME FROM CITY AS T1 LEFT JOIN FARM_COMPETITION AS T2 ON T1.CITY_ID = T2.HOST_CITY_ID WHERE T2.HOST_CITY_ID IS NOT NULL;",
+          "error_type": "JOIN USED ON THE WRONG FILTER"
+        },
+        {
+          "query": "SELECT FARM_ID FROM FARM WHERE FARM_ID NOT IN (SELECT FARM_ID FROM COMPETITION_RECORD);",
+          "error_type": "WRONG TABLE"
+        }
+      ]
+    }
+  },
+  {
+    "question": "which course has most number of registered students?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT COURSE_NAME FROM COURSES WHERE COURSE_ID IN (SELECT COURSE_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1);",
+        "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC FETCH FIRST 1 ROW ONLY;",
+        "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(T2.STUDENT_ID) DESC LIMIT 1;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "RETRIEVING DATA BASED ON ATTENDANCE RECORDS RATHER THAN REGISTRATION RECORDS."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC;",
+          "error_type": "RETURNS A LIST OF ALL COURSES SORTED BY POPULARITY, NOT JUST THE SINGLE TOP COURSE."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "RETURNS THE COURSE WITH THE FEWEST REGISTERED STUDENTS."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "INVALID AGGREGATION."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the name of the course with the most registered students?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT T1.COURSE_NAME FROM COURSES AS T1, STUDENT_COURSE_REGISTRATIONS AS T2 WHERE T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+        "SELECT COURSE_NAME FROM COURSES WHERE COURSE_ID = (SELECT COURSE_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1);",
+        "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID HAVING COUNT(*) >= ALL(SELECT COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY COURSE_ID);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "QUERIES ATTENDANCE RECORDS INSTEAD OF REGISTRATION RECORDS."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) DESC;",
+          "error_type": "MISSING LIMIT CLAUSE."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "RETURNS THE COURSE WITH THE FEWEST REGISTRATIONS."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME, COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "MISSING AGGREGATION."
+        }
+      ]
+    }
+  },
+  {
+    "question": "what is id of students who registered some courses but the least number of courses in these students?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) LIMIT 1",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC FETCH FIRST 1 ROW ONLY;",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID HAVING COUNT(*) = (SELECT COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC LIMIT 1);",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID HAVING COUNT(*) <= ALL(SELECT COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "RETURNS THE STUDENT WITH THE HIGHEST NUMBER OF REGISTRATIONS."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "QUERIES ATTENDANCE DATA INSTEAD OF REGISTRATION DATA."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "MISSING GROUP BY CLAUSE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY STUDENT_ID ASC LIMIT 1;",
+          "error_type": "ORDERING BY ID INSTEAD OF COUNT."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC;",
+          "error_type": "MISSING LIMIT CLAUSE."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the ids of the students who registered for some courses but had the least number of courses for all students?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) LIMIT 1",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC FETCH FIRST 1 ROW ONLY;",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID HAVING COUNT(*) = (SELECT COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC LIMIT 1);",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID HAVING COUNT(*) <= ALL(SELECT COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "WRONG SORT ORDER."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "WRONG TABLE (USES ATTENDANCE INSTEAD OF REGISTRATION)."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) ASC;",
+          "error_type": "MISSING LIMIT CLAUSE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "MISSING GROUP BY."
+        },
+        {
+          "query": "SELECT MIN(STUDENT_ID) FROM STUDENT_COURSE_REGISTRATIONS;",
+          "error_type": "SELECTING MINIMUM ID INSTEAD OF MINIMUM COUNT."
+        }
+      ]
+    }
+  },
+  {
+    "question": "what are the first name and last name of all candidates?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T2.FIRST_NAME ,  T2.LAST_NAME FROM CANDIDATES AS T1 JOIN PEOPLE AS T2 ON T1.CANDIDATE_ID = T2.PERSON_ID",
+        "SELECT T2.FIRST_NAME, T2.LAST_NAME FROM CANDIDATES AS T1, PEOPLE AS T2 WHERE T1.CANDIDATE_ID = T2.PERSON_ID;",
+        "SELECT FIRST_NAME, LAST_NAME FROM PEOPLE WHERE PERSON_ID IN (SELECT CANDIDATE_ID FROM CANDIDATES);",
+        "SELECT FIRST_NAME, LAST_NAME FROM PEOPLE WHERE EXISTS (SELECT 1 FROM CANDIDATES WHERE CANDIDATES.CANDIDATE_ID = PEOPLE.PERSON_ID);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT FIRST_NAME, LAST_NAME FROM CANDIDATES;",
+          "error_type": "THE COLUMNS FIRST_NAME AND LAST_NAME DO NOT EXIST IN THE CANDIDATES TABLE; THEY ARE IN THE PEOPLE TABLE."
+        },
+        {
+          "query": "SELECT FIRST_NAME, LAST_NAME FROM PEOPLE;",
+          "error_type": "MISSING JOIN."
+        },
+        {
+          "query": "SELECT T2.FIRST_NAME, T2.LAST_NAME FROM STUDENTS AS T1 JOIN PEOPLE AS T2 ON T1.STUDENT_ID = T2.PERSON_ID;",
+          "error_type": "JOINING WITH THE WRONG TABLE"
+        },
+        {
+          "query": "SELECT T2.FIRST_NAME, T2.LAST_NAME FROM CANDIDATES AS T1, PEOPLE AS T2;",
+          "error_type": "WRONG JOIN CONDITION."
+        },
+        {
+          "query": "SELECT PERSON_ID FROM PEOPLE WHERE PERSON_ID IN (SELECT CANDIDATE_ID FROM CANDIDATES);",
+          "error_type": "SELECTING ID INSTEAD OF NAME."
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the id of students who never attends courses?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID NOT IN (SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE)",
+        "SELECT STUDENT_ID FROM STUDENTS AS T1 WHERE NOT EXISTS (SELECT 1 FROM STUDENT_COURSE_ATTENDANCE AS T2 WHERE T1.STUDENT_ID = T2.STUDENT_ID);",
+        "SELECT T1.STUDENT_ID FROM STUDENTS AS T1 LEFT JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID WHERE T2.STUDENT_ID IS NULL;",
+        "SELECT STUDENT_ID FROM STUDENTS EXCEPT SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID IN (SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE);",
+          "error_type": "RETURNS THE EXACT OPPOSITE OF THE REQUIREMENT (STUDENTS WHO HAVE ATTENDED AT LEAST ONCE)."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID NOT IN (SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS);",
+          "error_type": "WRONG TABLE."
+        },
+        {
+          "query": "SELECT T1.STUDENT_ID FROM STUDENTS AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID;",
+          "error_type": "RETURNS ONLY STUDENTS WHO HAVE ATTENDANCE RECORDS."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID != (SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE);",
+          "error_type": "INCORRECT OPERATOR WITH SUBQUERY."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE DATE_OF_ATTENDANCE IS NULL;",
+          "error_type": "THE ATTENDANCE TABLE TYPICALLY ONLY CONTAINS RECORDS FOR WHEN ATTENDANCE OCCURRED; STUDENTS WHO NEVER ATTENDED USUALLY WON'T BE IN THIS TABLE AT ALL."
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the id of students who attended some courses?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE",
+        "SELECT DISTINCT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE;",
+        "SELECT DISTINCT T1.STUDENT_ID FROM STUDENTS AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID;",
+        "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID IN (SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE);",
+        "SELECT STUDENT_ID FROM STUDENTS AS T1 WHERE EXISTS (SELECT 1 FROM STUDENT_COURSE_ATTENDANCE AS T2 WHERE T1.STUDENT_ID = T2.STUDENT_ID);",
+        "SELECT STUDENT_ID FROM STUDENTS INTERSECT SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS;",
+          "error_type": "WRONG TABLE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENTS;",
+          "error_type": "RETURNS EVERY STUDENT IN THE DATABASE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID NOT IN (SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE);",
+          "error_type": "RETURNS THE EXACT OPPOSITE OF THE REQUIREMENT."
+        },
+        {
+          "query": "SELECT COURSE_ID FROM STUDENT_COURSE_ATTENDANCE;",
+          "error_type": "SELECTING THE WRONG COLUMN."
+        },
+        {
+          "query": "SELECT COUNT(STUDENT_ID) FROM STUDENT_COURSE_ATTENDANCE;",
+          "error_type": "RETURNS THE TOTAL COUNT OF ATTENDANCE RECORDS RATHER THAN THE LIST OF IDS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the ids of all students who have attended at least one course?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE",
+        "SELECT DISTINCT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE;",
+        "SELECT DISTINCT T1.STUDENT_ID FROM STUDENTS AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID;",
+        "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID IN (SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE);",
+        "SELECT STUDENT_ID FROM STUDENTS AS T1 WHERE EXISTS (SELECT 1 FROM STUDENT_COURSE_ATTENDANCE AS T2 WHERE T1.STUDENT_ID = T2.STUDENT_ID);",
+        "SELECT STUDENT_ID FROM STUDENTS INTERSECT SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS;",
+          "error_type": "WRONG TABLE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENTS;",
+          "error_type": "RETURNS EVERY STUDENT IN THE DATABASE;"
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID NOT IN (SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE);",
+          "error_type": "RETURNS THE EXACT OPPOSITE OF THE REQUIREMENT."
+        },
+        {
+          "query": "SELECT COURSE_ID FROM STUDENT_COURSE_ATTENDANCE;",
+          "error_type": "SELECTING THE WRONG COLUMN."
+        },
+        {
+          "query": "SELECT COUNT(STUDENT_ID) FROM STUDENT_COURSE_ATTENDANCE;",
+          "error_type": "RETURNS THE TOTAL COUNT OF ATTENDANCE RECORDS RATHER THAN THE LIST OF IDS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the ids of all students for courses and what are the names of those courses?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.STUDENT_ID ,  T2.COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN COURSES AS T2 ON T1.COURSE_ID = T2.COURSE_ID",
+        "SELECT T1.STUDENT_ID, T2.COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS AS T1, COURSES AS T2 WHERE T1.COURSE_ID = T2.COURSE_ID;",
+        "SELECT STUDENT_ID, COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS JOIN COURSES USING(COURSE_ID);",
+        "SELECT STUDENT_ID, COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS NATURAL JOIN COURSES;",
+        "SELECT STUDENT_ID, (SELECT COURSE_NAME FROM COURSES WHERE COURSES.COURSE_ID = STUDENT_COURSE_REGISTRATIONS.COURSE_ID) AS COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.STUDENT_ID, T2.COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS AS T1, COURSES AS T2;",
+          "error_type": "MISSING JOIN CONDITION."
+        },
+        {
+          "query": "SELECT STUDENT_ID, COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS;",
+          "error_type": "COLUMN NOT FOUND."
+        },
+        {
+          "query": "SELECT T1.STUDENT_ID, T2.COURSE_NAME FROM STUDENT_COURSE_ATTENDANCE AS T1 JOIN COURSES AS T2 ON T1.COURSE_ID = T2.COURSE_ID;",
+          "error_type": "WRONG TABLE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS;",
+          "error_type": "MISSING COLUMN COURSE_NAME."
+        },
+        {
+          "query": "SELECT T1.STUDENT_ID, T2.COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN COURSES AS T2 ON T1.STUDENT_ID = T2.COURSE_ID;",
+          "error_type": "WRONG JOIN CONDITION."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is detail of the student who most recently registered course?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T2.STUDENT_DETAILS FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN STUDENTS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID ORDER BY T1.REGISTRATION_DATE DESC LIMIT 1",
+        "SELECT T2.STUDENT_DETAILS FROM STUDENT_COURSE_REGISTRATIONS AS T1, STUDENTS AS T2 WHERE T1.STUDENT_ID = T2.STUDENT_ID ORDER BY T1.REGISTRATION_DATE DESC LIMIT 1;",
+        "SELECT STUDENT_DETAILS FROM STUDENTS WHERE STUDENT_ID = (SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS ORDER BY REGISTRATION_DATE DESC LIMIT 1);",
+        "SELECT T2.STUDENT_DETAILS FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN STUDENTS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID WHERE T1.REGISTRATION_DATE = (SELECT MAX(REGISTRATION_DATE) FROM STUDENT_COURSE_REGISTRATIONS);",
+        "SELECT T2.STUDENT_DETAILS FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN STUDENTS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID ORDER BY T1.REGISTRATION_DATE DESC FETCH FIRST 1 ROW ONLY;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T2.STUDENT_DETAILS FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN STUDENTS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID ORDER BY T1.REGISTRATION_DATE ASC LIMIT 1;",
+          "error_type": "WRONG SORT ORDER."
+        },
+        {
+          "query": "SELECT T2.STUDENT_DETAILS FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN STUDENTS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID ORDER BY T1.REGISTRATION_DATE DESC;",
+          "error_type": "MISSING LIMIT CLAUSE."
+        },
+        {
+          "query": "SELECT T2.STUDENT_DETAILS FROM STUDENT_COURSE_ATTENDANCE AS T1 JOIN STUDENTS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID ORDER BY T1.DATE_OF_ATTENDANCE DESC LIMIT 1;",
+          "error_type": "SELECTING FROM WRONG TABLE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS ORDER BY REGISTRATION_DATE DESC LIMIT 1;",
+          "error_type": "SELECTING WRONG COLUMN."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many students attend course English?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID WHERE T1.COURSE_NAME = \"ENGLISH\"",
+        "SELECT COUNT(*) FROM COURSES AS T1, STUDENT_COURSE_ATTENDANCE AS T2 WHERE T1.COURSE_ID = T2.COURSE_ID AND T1.COURSE_NAME = 'ENGLISH';",
+        "SELECT COUNT(*) FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID IN (SELECT COURSE_ID FROM COURSES WHERE COURSE_NAME = 'ENGLISH');",
+        "SELECT COUNT(*) FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = (SELECT COURSE_ID FROM COURSES WHERE COURSE_NAME = 'ENGLISH');",
+        "SELECT COUNT(STUDENT_ID) FROM STUDENT_COURSE_ATTENDANCE JOIN COURSES ON STUDENT_COURSE_ATTENDANCE.COURSE_ID = COURSES.COURSE_ID WHERE COURSES.COURSE_NAME = 'ENGLISH';"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID;",
+          "error_type": "MISSING WHERE CLAUSE. RETURNS THE TOTAL ATTENDANCE COUNT FOR ALL COURSES COMBINED, NOT JUST ENGLISH."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 'ENGLISH';",
+          "error_type": "TRIES TO COMPARE A NUMERIC COURSE_ID WITH THE STRING 'ENGLISH'."
+        },
+        {
+          "query": "SELECT T2.STUDENT_ID FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID WHERE T1.COURSE_NAME = 'ENGLISH';",
+          "error_type": "RETURNS THE LIST OF STUDENT IDS RATHER THAN THE TOTAL COUNT."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID WHERE T1.COURSE_NAME = 'SPANISH';",
+          "error_type": "FILTERS FOR THE WRONG COURSE."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many courses do the student whose id is 171 attend?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID WHERE T2.STUDENT_ID = 171",
+        "SELECT COUNT(*) FROM STUDENT_COURSE_ATTENDANCE WHERE STUDENT_ID = 171;",
+        "SELECT COUNT(*) FROM COURSES AS T1, STUDENT_COURSE_ATTENDANCE AS T2 WHERE T1.COURSE_ID = T2.COURSE_ID AND T2.STUDENT_ID = 171;",
+        "SELECT COUNT(COURSE_ID) FROM STUDENT_COURSE_ATTENDANCE WHERE STUDENT_ID = 171;",
+        "SELECT COUNT(*) FROM STUDENT_COURSE_ATTENDANCE WHERE STUDENT_ID = (SELECT STUDENT_ID FROM STUDENTS WHERE STUDENT_ID = 171);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS WHERE STUDENT_ID = 171;",
+          "error_type": "WRONG TABLE."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM STUDENT_COURSE_ATTENDANCE;",
+          "error_type": "RETURNS THE TOTAL NUMBER OF ATTENDANCE RECORDS FOR ALL STUDENTS."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM STUDENT_COURSE_ATTENDANCE WHERE STUDENT_ID = 1;",
+          "error_type": "QUERIES FOR THE WRONG STUDENT ID."
+        },
+        {
+          "query": "SELECT COURSE_ID FROM STUDENT_COURSE_ATTENDANCE WHERE STUDENT_ID = 171;",
+          "error_type": "RETURNS THE LIST OF ACTUAL COURSE IDS RATHER THAN THE NUMERICAL COUNT."
+        },
+        {
+          "query": "SELECT STUDENT_ID, COUNT(*) FROM STUDENT_COURSE_ATTENDANCE GROUP BY STUDENT_ID;",
+          "error_type": "RETURNS A LIST OF COUNTS FOR EVERY STUDENT, NOT JUST STUDENT 171."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find id of the candidate whose email is stanley.monahan@example.org?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T2.CANDIDATE_ID FROM PEOPLE AS T1 JOIN CANDIDATES AS T2 ON T1.PERSON_ID = T2.CANDIDATE_ID WHERE T1.EMAIL_ADDRESS = \"STANLEY.MONAHAN@EXAMPLE.ORG\"",
+        "SELECT T2.CANDIDATE_ID FROM PEOPLE AS T1, CANDIDATES AS T2 WHERE T1.PERSON_ID = T2.CANDIDATE_ID AND T1.EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG';",
+        "SELECT CANDIDATE_ID FROM CANDIDATES WHERE CANDIDATE_ID IN (SELECT PERSON_ID FROM PEOPLE WHERE EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG');",
+        "SELECT CANDIDATE_ID FROM CANDIDATES WHERE CANDIDATE_ID = (SELECT PERSON_ID FROM PEOPLE WHERE EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG');",
+        "SELECT CANDIDATE_ID FROM CANDIDATES AS T1 WHERE EXISTS (SELECT 1 FROM PEOPLE AS T2 WHERE T2.PERSON_ID = T1.CANDIDATE_ID AND T2.EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG');"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATES WHERE EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG';",
+          "error_type": "THE EMAIL_ADDRESS COLUMN IS IN THE PEOPLE TABLE, NOT THE CANDIDATES TABLE."
+        },
+        {
+          "query": "SELECT T2.CANDIDATE_ID FROM PEOPLE AS T1, CANDIDATES AS T2 WHERE T1.EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG';",
+          "error_type": "RETURNS EVERY CANDIDATE ID REPEATED FOR THE MATCH IN THE PEOPLE TABLE."
+        },
+        {
+          "query": "SELECT PERSON_ID FROM PEOPLE WHERE EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG';",
+          "error_type": "THIS RETRIEVES THE PERSON ID BUT IT DOESN'T VERIFY THAT THE PERSON IS ACTUALLY A REGISTERED CANDIDATE IN THE CANDIDATES TABLE."
+        },
+        {
+          "query": "SELECT EMAIL_ADDRESS FROM PEOPLE WHERE EMAIL_ADDRESS = 'STANLEY.MONAHAN@EXAMPLE.ORG';",
+          "error_type": "RETURNS THE EMAIL ADDRESS ITSELF RATHER THAN THE CANDIDATE ID."
+        },
+        {
+          "query": "SELECT CANDIDATE_ID FROM PEOPLE AS T1 JOIN CANDIDATES AS T2 ON T1.PERSON_ID = T2.CANDIDATE_ID WHERE T1.EMAIL_ADDRESS = 'WRONG.EMAIL@EXAMPLE.ORG';",
+          "error_type": "FILTERS FOR A VALUE DIFFERENT FROM THE ONE REQUESTED."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find id of the candidate who most recently accessed the course?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS ORDER BY ASSESSMENT_DATE DESC LIMIT 1",
+        "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS ORDER BY ASSESSMENT_DATE DESC FETCH FIRST 1 ROW ONLY;",
+        "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASSESSMENT_DATE = (SELECT MAX(ASSESSMENT_DATE) FROM CANDIDATE_ASSESSMENTS);",
+        "SELECT T1.CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS AS T1 ORDER BY T1.ASSESSMENT_DATE DESC LIMIT 1;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS ORDER BY ASSESSMENT_DATE ASC LIMIT 1;",
+          "error_type": "RETURNS THE CANDIDATE WHO ACCESSED THE COURSE FURTHEST IN THE PAST."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE ORDER BY DATE_OF_ATTENDANCE DESC LIMIT 1;",
+          "error_type": "RETURNS A STUDENT ID INSTEAD OF A CANDIDATE ID, AND USES THE WRONG TABLE."
+        },
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS ORDER BY ASSESSMENT_DATE DESC;",
+          "error_type": "RETURNS A LIST OF ALL CANDIDATES SORTED BY DATE, RATHER THAN THE SINGLE MOST RECENT ONE."
+        },
+        {
+          "query": "SELECT ASSESSMENT_DATE FROM CANDIDATE_ASSESSMENTS ORDER BY ASSESSMENT_DATE DESC LIMIT 1;",
+          "error_type": "RETURNS THE TIMESTAMP OF THE ACCESS, NOT THE ID OF THE CANDIDATE."
+        },
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASSESSMENT_DATE = (SELECT MIN(ASSESSMENT_DATE) FROM CANDIDATE_ASSESSMENTS);",
+          "error_type": "SELECTS THE EARLIEST DATE INSTEAD OF THE LATEST."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is detail of the student who registered the most number of courses?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.STUDENT_DETAILS FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID ORDER BY COUNT(*) DESC LIMIT 1",
+        "SELECT T1.STUDENT_DETAILS FROM STUDENTS AS T1, STUDENT_COURSE_REGISTRATIONS AS T2 WHERE T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+        "SELECT STUDENT_DETAILS FROM STUDENTS WHERE STUDENT_ID = (SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID ORDER BY COUNT(*) DESC LIMIT 1);",
+        "SELECT T1.STUDENT_DETAILS FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID, T1.STUDENT_DETAILS ORDER BY COUNT(*) DESC LIMIT 1;",
+        "SELECT T1.STUDENT_DETAILS FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID HAVING COUNT(*) >= ALL(SELECT COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.STUDENT_DETAILS FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID ORDER BY COUNT(*) ASC LIMIT 1;",
+          "error_type": "RETURNS THE STUDENT WITH THE FEWEST REGISTRATIONS."
+        },
+        {
+          "query": "SELECT T1.STUDENT_DETAILS FROM STUDENTS AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "WRONG TABLE."
+        },
+        {
+          "query": "SELECT T1.STUDENT_DETAILS FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID ORDER BY COUNT(*) DESC;",
+          "error_type": "RETURNS A LIST OF ALL STUDENTS SORTED BY COUNT, RATHER THAN JUST THE TOP ONE."
+        },
+        {
+          "query": "SELECT T1.STUDENT_ID FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID ORDER BY COUNT(*) DESC LIMIT 1;",
+          "error_type": "RETURNS THE ID, BUT THE QUESTION SPECIFICALLY ASKS FOR STUDENT DETAILS."
+        },
+        {
+          "query": "SELECT STUDENT_DETAILS FROM STUDENTS ORDER BY STUDENT_DETAILS DESC LIMIT 1;",
+          "error_type": "RETURNS THE STUDENT DETAIL THAT IS LAST ALPHABETICALLY, IGNORING REGISTRATION COUNTS ENTIRELY."
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the id of students who registered some courses and the number of their registered courses?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T1.STUDENT_ID ,  COUNT(*) FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID",
+        "SELECT T1.STUDENT_ID, COUNT(*) FROM STUDENTS AS T1, STUDENT_COURSE_REGISTRATIONS AS T2 WHERE T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T1.STUDENT_ID;",
+        "SELECT STUDENT_ID, COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID;",
+        "SELECT STUDENT_ID, COUNT(COURSE_ID) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID;",
+        "SELECT T2.STUDENT_ID, COUNT(*) FROM STUDENTS AS T1 INNER JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID GROUP BY T2.STUDENT_ID;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID, COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS;",
+          "error_type": "SYNTAX ERROR. CANNOT AGGREGATE COUNT WITHOUT GROUPING BY STUDENT_ID."
+        },
+        {
+          "query": "SELECT STUDENT_ID, COUNT(*) FROM STUDENT_COURSE_ATTENDANCE GROUP BY STUDENT_ID;",
+          "error_type": "COUNTS HOW MANY TIMES A STUDENT ATTENDED, NOT HOW MANY COURSES THEY REGISTERED FOR."
+        },
+        {
+          "query": "SELECT STUDENT_ID, SUM(COURSE_ID) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID;",
+          "error_type": "MATHEMATICALLY ADDS UP THE COURSE IDS."
+        },
+        {
+          "query": "SELECT STUDENT_ID, COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY COURSE_ID;",
+          "error_type": "GROUPS BY THE WRONG COLUMN, RESULTING IN MISMATCHED IDS AND COUNTS."
+        },
+        {
+          "query": "SELECT STUDENT_ID, COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY COURSE_ID;",
+          "error_type": "GROUPS BY THE WRONG COLUMN, RESULTING IN MISMATCHED IDS AND COUNTS."
+        },
+        {
+          "query": "SELECT COURSE_ID, COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY STUDENT_ID;",
+          "error_type": "RETURNS THE COURSE ID INSTEAD OF THE STUDENT ID."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many registed students do each course have? List course name and the number of their registered students?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T3.COURSE_NAME ,  COUNT(*) FROM STUDENTS AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.STUDENT_ID = T2.STUDENT_ID JOIN COURSES AS T3 ON T2.COURSE_ID = T3.COURSE_ID GROUP BY T2.COURSE_ID",
+        "SELECT T1.COURSE_NAME, COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID;",
+        "SELECT T1.COURSE_NAME, COUNT(*) FROM COURSES AS T1, STUDENT_COURSE_REGISTRATIONS AS T2 WHERE T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID;",
+        "SELECT T1.COURSE_NAME, COUNT(T2.STUDENT_ID) FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID;",
+        "SELECT T1.COURSE_NAME, COUNT(T2.STUDENT_ID) FROM COURSES AS T1 LEFT JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.COURSE_NAME, COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_ATTENDANCE AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID;",
+          "error_type": "COUNTS HOW MANY TIMES STUDENTS ATTENDED, NOT HOW MANY ARE REGISTERED."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME, COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID;",
+          "error_type": "SYNTAX ERROR. AGGREGATES ALL ROWS INTO ONE COUNT BUT TRIES TO SELECT A SPECIFIC COURSE NAME."
+        },
+        {
+          "query": "SELECT T1.COURSE_NAME, COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T2.STUDENT_ID;",
+          "error_type": "CALCULATES HOW MANY COURSES EACH STUDENT REGISTERED FOR, RATHER THAN HOW MANY STUDENTS EACH COURSE HAS."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM COURSES AS T1 JOIN STUDENT_COURSE_REGISTRATIONS AS T2 ON T1.COURSE_ID = T2.COURSE_ID GROUP BY T1.COURSE_ID;",
+          "error_type": "RETURNS THE COUNTS BUT FAILS TO LIST THE COURSE_NAME AS REQUESTED."
+        },
+        {
+          "query": "SELECT COURSE_ID, COUNT(*) FROM STUDENT_COURSE_REGISTRATIONS GROUP BY COURSE_ID;",
+          "error_type": "RETURNS THE ID INSTEAD OF THE COURSE NAME."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find id of candidates whose assessment code is \"Pass\"?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE = \"PASS\"",
+        "SELECT DISTINCT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE = 'PASS';",
+        "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE LIKE 'PASS';"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATES WHERE ASESSMENT_OUTCOME_CODE = 'PASS';",
+          "error_type": "COLUMN ASESSMENT_OUTCOME_CODE DOES NOT EXIST IN THE CANDIDATES TABLE."
+        },
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS;",
+          "error_type": "RETURNS IDS FOR ALL ASSESSMENTS REGARDLESS OF THE OUTCOME."
+        },
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE = 'FAIL';",
+          "error_type": "RETRIEVES CANDIDATES WHO FAILED INSTEAD OF THOSE WHO PASSED."
+        },
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE != 'PASS';",
+          "error_type": "RETRIEVES EVERYONE WHO DID NOT PASS."
+        },
+        {
+          "query": "SELECT ASESSMENT_OUTCOME_CODE FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE = 'PASS';",
+          "error_type": "RETURNS THE WORD PASS REPEATEDLY INSTEAD OF THE CANDIDATE IDS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the cell mobile number of the candidates whose assessment code is \"Fail\"?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT T3.CELL_MOBILE_NUMBER FROM CANDIDATES AS T1 JOIN CANDIDATE_ASSESSMENTS AS T2 ON T1.CANDIDATE_ID = T2.CANDIDATE_ID JOIN PEOPLE AS T3 ON T1.CANDIDATE_ID = T3.PERSON_ID WHERE T2.ASESSMENT_OUTCOME_CODE = \"FAIL\"",
+        "SELECT T1.CELL_MOBILE_NUMBER FROM PEOPLE AS T1 JOIN CANDIDATE_ASSESSMENTS AS T2 ON T1.PERSON_ID = T2.CANDIDATE_ID WHERE T2.ASESSMENT_OUTCOME_CODE = 'FAIL';",
+        "SELECT T3.CELL_MOBILE_NUMBER FROM CANDIDATES AS T1, CANDIDATE_ASSESSMENTS AS T2, PEOPLE AS T3 WHERE T1.CANDIDATE_ID = T2.CANDIDATE_ID AND T1.CANDIDATE_ID = T3.PERSON_ID AND T2.ASESSMENT_OUTCOME_CODE = 'FAIL';",
+        "SELECT CELL_MOBILE_NUMBER FROM PEOPLE AS T1 WHERE EXISTS (SELECT 1 FROM CANDIDATE_ASSESSMENTS AS T2 WHERE T2.CANDIDATE_ID = T1.PERSON_ID AND T2.ASESSMENT_OUTCOME_CODE = 'FAIL');",
+        "SELECT CELL_MOBILE_NUMBER FROM PEOPLE WHERE PERSON_ID IN (SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE = 'FAIL');"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CELL_MOBILE_NUMBER FROM CANDIDATES AS T1 JOIN CANDIDATE_ASSESSMENTS AS T2 ON T1.CANDIDATE_ID = T2.CANDIDATE_ID WHERE T2.ASESSMENT_OUTCOME_CODE = 'FAIL';",
+          "error_type": "COLUMN CELL_MOBILE_NUMBER DOES NOT EXIST IN THE CANDIDATES TABLE."
+        },
+        {
+          "query": "SELECT CELL_MOBILE_NUMBER FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE = 'FAIL';",
+          "error_type": "COLUMN CELL_MOBILE_NUMBER DOES NOT EXIST IN CANDIDATE_ASSESSMENTS."
+        },
+        {
+          "query": "SELECT T1.CELL_MOBILE_NUMBER FROM PEOPLE AS T1 JOIN CANDIDATE_ASSESSMENTS AS T2 ON T1.PERSON_ID = T2.CANDIDATE_ID WHERE T2.ASESSMENT_OUTCOME_CODE = 'PASS';",
+          "error_type": "RETURNS NUMBERS FOR CANDIDATES WHO PASSED, NOT THOSE WHO FAILED."
+        },
+        {
+          "query": "SELECT CANDIDATE_ID FROM CANDIDATE_ASSESSMENTS WHERE ASESSMENT_OUTCOME_CODE = 'FAIL';",
+          "error_type": "RETURNS THE ID, BUT THE QUESTION EXPLICITLY ASKS FOR THE CELL MOBILE NUMBER."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the id of students who registered course 301?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID  =  301",
+        "SELECT DISTINCT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301;",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID IN (301);",
+        "SELECT T1.STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE AS T1 JOIN COURSES AS T2 ON T1.COURSE_ID = T2.COURSE_ID WHERE T2.COURSE_ID = 301;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS WHERE COURSE_ID = 301;",
+          "error_type": "USES STUDENT_COURSE_REGISTRATIONS INSTEAD OF THE STUDENT_COURSE_ATTENDANCE TABLE DEFINED IN THE GOLD QUERY."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 302;",
+          "error_type": "FILTERS FOR THE WRONG COURSE NUMBER."
+        },
+        {
+          "query": "SELECT COURSE_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301;",
+          "error_type": "RETURNS THE COURSE ID REPEATEDLY INSTEAD OF THE STUDENT IDS."
+        },
+        {
+          "query": "SELECT COUNT(STUDENT_ID) FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301;",
+          "error_type": "RETURNS THE NUMBER OF STUDENTS INSTEAD OF THEIR IDS."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE;",
+          "error_type": "RETURNS STUDENTS FROM ALL COURSES, NOT JUST COURSE 301."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the id of the student who most recently registered course 301?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301 ORDER BY DATE_OF_ATTENDANCE DESC LIMIT 1",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301 ORDER BY DATE_OF_ATTENDANCE DESC FETCH FIRST 1 ROW ONLY;",
+        "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301 AND DATE_OF_ATTENDANCE = (SELECT MAX(DATE_OF_ATTENDANCE) FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_REGISTRATIONS WHERE COURSE_ID = 301 ORDER BY REGISTRATION_DATE DESC LIMIT 1;",
+          "error_type": "QUERIES STUDENT_COURSE_REGISTRATIONS INSTEAD OF THE STUDENT_COURSE_ATTENDANCE TABLE SPECIFIED IN THE GOLD QUERY."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301 ORDER BY DATE_OF_ATTENDANCE ASC LIMIT 1;",
+          "error_type": "RETURNS THE STUDENT WHO ATTENDED THE COURSE EARLIEST, NOT MOST RECENTLY."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301 ORDER BY DATE_OF_ATTENDANCE DESC;",
+          "error_type": "RETURNS A LIST OF ALL STUDENTS SORTED BY DATE, RATHER THAN THE SINGLE MOST RECENT ONE."
+        },
+        {
+          "query": "SELECT STUDENT_ID FROM STUDENT_COURSE_ATTENDANCE ORDER BY DATE_OF_ATTENDANCE DESC LIMIT 1;",
+          "error_type": "RETURNS THE MOST RECENT ATTENDEE FOR ANY COURSE, NOT SPECIFICALLY COURSE 301."
+        },
+        {
+          "query": "SELECT DATE_OF_ATTENDANCE FROM STUDENT_COURSE_ATTENDANCE WHERE COURSE_ID = 301 ORDER BY DATE_OF_ATTENDANCE DESC LIMIT 1;",
+          "error_type": "RETURNS THE DATE ITSELF INSTEAD OF THE STUDENT ID."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find distinct cities of addresses of people?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT T1.CITY FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID",
+        "SELECT DISTINCT T1.CITY FROM ADDRESSES AS T1, PEOPLE_ADDRESSES AS T2 WHERE T1.ADDRESS_ID = T2.ADDRESS_ID;",
+        "SELECT DISTINCT CITY FROM ADDRESSES WHERE ADDRESS_ID IN (SELECT ADDRESS_ID FROM PEOPLE_ADDRESSES);",
+        "SELECT DISTINCT CITY FROM ADDRESSES AS T1 WHERE EXISTS (SELECT 1 FROM PEOPLE_ADDRESSES AS T2 WHERE T2.ADDRESS_ID = T1.ADDRESS_ID);",
+        "SELECT DISTINCT CITY FROM ADDRESSES NATURAL JOIN PEOPLE_ADDRESSES;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT T1.CITY FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID;",
+          "error_type": "RETURNS A LIST OF CITIES FOR EVERY ADDRESS ENTRY, RESULTING IN MANY DUPLICATE CITY NAMES."
+        },
+        {
+          "query": "SELECT DISTINCT CITY FROM ADDRESSES;",
+          "error_type": "RETURNS CITIES FROM THE ADDRESSES TABLE EVEN IF NO PERSON IS CURRENTLY ASSIGNED TO THAT ADDRESS."
+        },
+        {
+          "query": "SELECT DISTINCT CITY FROM PEOPLE;",
+          "error_type": "THE CITY COLUMN EXISTS IN THE ADDRESSES TABLE, NOT THE PEOPLE TABLE."
+        },
+        {
+          "query": "SELECT DISTINCT ADDRESS_ID FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID;",
+          "error_type": "RETURNS THE IDS OF THE ADDRESSES RATHER THAN THE NAMES OF THE CITIES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find distinct cities of address of students?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT T1.CITY FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID JOIN STUDENTS AS T3 ON T2.PERSON_ID = T3.STUDENT_ID",
+        "SELECT DISTINCT T1.CITY FROM ADDRESSES AS T1, PEOPLE_ADDRESSES AS T2, STUDENTS AS T3 WHERE T1.ADDRESS_ID = T2.ADDRESS_ID AND T2.PERSON_ID = T3.STUDENT_ID;",
+        "SELECT DISTINCT CITY FROM ADDRESSES WHERE ADDRESS_ID IN (SELECT ADDRESS_ID FROM PEOPLE_ADDRESSES WHERE PERSON_ID IN (SELECT STUDENT_ID FROM STUDENTS));",
+        "SELECT DISTINCT CITY FROM ADDRESSES AS T1 WHERE EXISTS (SELECT 1 FROM PEOPLE_ADDRESSES AS T2 JOIN STUDENTS AS T3 ON T2.PERSON_ID = T3.STUDENT_ID WHERE T2.ADDRESS_ID = T1.ADDRESS_ID);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT DISTINCT T1.CITY FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID;",
+          "error_type": "RETURNS CITIES FOR EVERYONE IN THE DATABASE (STAFF, CANDIDATES, ETC.), NOT JUST STUDENTS."
+        },
+        {
+          "query": "SELECT T1.CITY FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID JOIN STUDENTS AS T3 ON T2.PERSON_ID = T3.STUDENT_ID;",
+          "error_type": "RETURNS DUPLICATES IF MULTIPLE STUDENTS LIVE IN THE SAME CITY OR IF A STUDENT HAS MULTIPLE ADDRESSES IN THE SAME CITY."
+        },
+        {
+          "query": "SELECT DISTINCT T1.CITY FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID JOIN CANDIDATES AS T3 ON T2.PERSON_ID = T3.CANDIDATE_ID;",
+          "error_type": "RETURNS CITIES FOR CANDIDATES, NOT STUDENTS."
+        },
+        {
+          "query": "SELECT DISTINCT CITY FROM ADDRESSES;",
+          "error_type": "RETURNS EVERY CITY IN THE DATABASE, REGARDLESS OF WHO LIVES THERE."
+        },
+        {
+          "query": "SELECT DISTINCT T1.ADDRESS_ID FROM ADDRESSES AS T1 JOIN PEOPLE_ADDRESSES AS T2 ON T1.ADDRESS_ID = T2.ADDRESS_ID JOIN STUDENTS AS T3 ON T2.PERSON_ID = T3.STUDENT_ID;",
+          "error_type": "RETURNS THE ADDRESS ID INSTEAD OF THE CITY NAME."
+        }
+      ]
+    }
+  },
+  {
+    "question": "List the names of courses in alphabetical order?",
+    "db_id": "student_assessment",
+    "queries": {
+      "correct_queries": [
+        "SELECT COURSE_NAME FROM COURSES ORDER BY COURSE_NAME",
+        "SELECT COURSE_NAME FROM COURSES ORDER BY COURSE_NAME ASC;",
+        "SELECT COURSE_NAME FROM COURSES ORDER BY 1;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COURSE_NAME FROM COURSES ORDER BY COURSE_NAME DESC;",
+          "error_type": "SORTS FROM Z TO A INSTEAD OF A TO Z."
+        },
+        {
+          "query": "SELECT COURSE_NAME FROM COURSES;",
+          "error_type": "RETURNS THE LIST IN AN ARBITRARY ORDER (INSERTION ORDER OR UNDEFINED), NOT NECESSARILY ALPHABETICAL."
+        },
+        {
+          "query": "SELECT COURSE_NAME FROM COURSES ORDER BY COURSE_ID;",
+          "error_type": "SORTS BY THE ID NUMBER INSTEAD OF THE NAME."
+        },
+        {
+          "query": "SELECT COURSE_ID FROM COURSES ORDER BY COURSE_NAME;",
+          "error_type": "RETURNS THE IDS INSTEAD OF THE NAMES."
+        },
+        {
+          "query": "SELECT DISTINCT T2.COURSE_NAME FROM STUDENT_COURSE_REGISTRATIONS AS T1 JOIN COURSES AS T2 ON T1.COURSE_ID = T2.COURSE_ID ORDER BY T2.COURSE_NAME;",
+          "error_type": "ONLY LISTS COURSES THAT HAVE AT LEAST ONE STUDENT REGISTERED, POTENTIALLY MISSING COURSES WITH NO REGISTRATIONS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the buildings which have rooms with capacity more than 50.",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT BUILDING FROM CLASSROOM WHERE CAPACITY  >  50",
+        "SELECT BUILDING FROM CLASSROOM WHERE CAPACITY > 50 GROUP BY BUILDING;",
+        "SELECT DISTINCT BUILDING FROM CLASSROOM AS T1 WHERE EXISTS (SELECT 1 FROM CLASSROOM AS T2 WHERE T1.BUILDING = T2.BUILDING AND T2.CAPACITY > 50);",
+        "SELECT DISTINCT BUILDING FROM CLASSROOM WHERE BUILDING IN (SELECT BUILDING FROM CLASSROOM WHERE CAPACITY > 50);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT BUILDING FROM CLASSROOM WHERE CAPACITY > 50;",
+          "error_type": "RETURNS THE BUILDING NAME MULTIPLE TIMES IF IT HAS MULTIPLE ROOMS WITH CAPACITY > 50."
+        },
+        {
+          "query": "SELECT DISTINCT BUILDING FROM CLASSROOM WHERE CAPACITY >= 50;",
+          "error_type": "INCLUDES ROOMS WITH EXACTLY 50 CAPACITY, VIOLATING MORE THAN 50."
+        },
+        {
+          "query": "SELECT DISTINCT BUILDING FROM CLASSROOM WHERE CAPACITY < 50;",
+          "error_type": "RETURNS BUILDINGS WITH SMALL ROOMS INSTEAD OF LARGE ONES."
+        },
+        {
+          "query": "SELECT BUILDING FROM DEPARTMENT WHERE BUDGET > 50;",
+          "error_type": "QUERIES THE DEPARTMENT TABLE AND COMPARES BUDGET."
+        },
+        {
+          "query": "SELECT DISTINCT ROOM_NUMBER FROM CLASSROOM WHERE CAPACITY > 50;",
+          "error_type": "RETURNS THE ROOM NUMBERS INSTEAD OF THE BUILDING NAMES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Count the number of rooms that are not in the Lamberton building.",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING != 'LAMBERTON'",
+        "SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING <> 'LAMBERTON';",
+        "SELECT COUNT(*) FROM CLASSROOM WHERE NOT BUILDING = 'LAMBERTON';",
+        "SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING NOT IN ('LAMBERTON');",
+        "SELECT (SELECT COUNT(*) FROM CLASSROOM) - (SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING = 'LAMBERTON');"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING = 'LAMBERTON';",
+          "error_type": "RETURNS THE COUNT OF ROOMS INSIDE THE LAMBERTON BUILDING, WHICH IS THE EXACT OPPOSITE OF THE REQUEST."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM CLASSROOM;",
+          "error_type": "RETURNS THE TOTAL NUMBER OF ROOMS IN THE UNIVERSITY, IGNORING THE EXCLUSION CRITERIA."
+        },
+        {
+          "query": "SELECT COUNT(DISTINCT BUILDING) FROM CLASSROOM WHERE BUILDING != 'LAMBERTON';",
+          "error_type": "RETURNS THE NUMBER OF UNIQUE BUILDINGS, EXCLUDING LAMBERTON, RATHER THAN THE TOTAL NUMBER OF INDIVIDUAL ROOMS."
+        },
+        {
+          "query": "SELECT ROOM_NUMBER FROM CLASSROOM WHERE BUILDING != 'LAMBERTON';",
+          "error_type": "RETURNS A LIST OF ROOM NUMBERS INSTEAD OF A SINGLE NUMERICAL COUNT."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM SECTION WHERE BUILDING != 'LAMBERTON';",
+          "error_type": "QUERIES THE SECTION TABLE, WHICH REPRESENTS SCHEDULED CLASSES RATHER THAN PHYSICAL ROOMS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the name and building of the departments whose budget is more than the average budget?",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT DEPT_NAME ,  BUILDING FROM DEPARTMENT WHERE BUDGET  >  (SELECT AVG(BUDGET) FROM DEPARTMENT)",
+        "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET > (SELECT SUM(BUDGET) / COUNT(*) FROM DEPARTMENT);",
+        "SELECT T1.DEPT_NAME, T1.BUILDING FROM DEPARTMENT AS T1, (SELECT AVG(BUDGET) AS AVG_B FROM DEPARTMENT) AS T2 WHERE T1.BUDGET > T2.AVG_B;",
+        "SELECT T1.DEPT_NAME, T1.BUILDING FROM DEPARTMENT AS T1 JOIN (SELECT AVG(BUDGET) AS AVG_VAL FROM DEPARTMENT) AS T2 ON T1.BUDGET > T2.AVG_VAL;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET > AVG(BUDGET);",
+          "error_type": "INVALID SQL. AGGREGATE FUNCTIONS CANNOT BE USED DIRECTLY IN A WHERE CLAUSE WITHOUT A SUBQUERY."
+        },
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET < (SELECT AVG(BUDGET) FROM DEPARTMENT);",
+          "error_type": "RETURNS DEPARTMENTS WITH BUDGETS SMALLER THAN THE AVERAGE."
+        },
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET > (SELECT MAX(BUDGET) FROM DEPARTMENT);",
+          "error_type": "RETURNS NOTHING, UNLESS THERE ARE TIES FOR MAX, AS NO BUDGET IS STRICTLY GREATER THAN THE MAXIMUM."
+        },
+        {
+          "query": "SELECT DEPT_NAME FROM DEPARTMENT WHERE BUDGET > (SELECT AVG(BUDGET) FROM DEPARTMENT);",
+          "error_type": "MISSES THE BUILDING COLUMN REQUIRED BY THE QUESTION."
+        },
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET > 50000;",
+          "error_type": "ASSUMES AN ARBITRARY VALUE INSTEAD OF DYNAMICALLY CALCULATING THE AVERAGE."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the room number of the rooms which can sit 50 to 100 students and their buildings.",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT BUILDING ,  ROOM_NUMBER FROM CLASSROOM WHERE CAPACITY BETWEEN 50 AND 100",
+        "SELECT BUILDING, ROOM_NUMBER FROM CLASSROOM WHERE CAPACITY >= 50 AND CAPACITY <= 100;",
+        "SELECT BUILDING, ROOM_NUMBER FROM CLASSROOM WHERE NOT (CAPACITY < 50 OR CAPACITY > 100);",
+        "SELECT ROOM_NUMBER, BUILDING FROM CLASSROOM WHERE CAPACITY BETWEEN 50 AND 100;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT BUILDING, ROOM_NUMBER FROM CLASSROOM WHERE CAPACITY > 50 AND CAPACITY < 100;",
+          "error_type": "STRICT INEQUALITY MISSES ROOMS WITH EXACTLY 50 OR 100 SEATS."
+        },
+        {
+          "query": "SELECT BUILDING, ROOM_NUMBER FROM CLASSROOM WHERE CAPACITY >= 50 OR CAPACITY <= 100;",
+          "error_type": "RETURNS EVERY ROOM IN THE DATABASE."
+        },
+        {
+          "query": "SELECT BUILDING, ROOM_NUMBER FROM CLASSROOM WHERE CAPACITY BETWEEN 100 AND 50;",
+          "error_type": "SQL BETWEEN EXPECTS THE LOWER VALUE FIRST. THIS QUERY RETURNS AN EMPTY SET."
+        },
+        {
+          "query": "SELECT BUILDING, ROOM_NUMBER FROM SECTION WHERE CAPACITY BETWEEN 50 AND 100;",
+          "error_type": "THE SECTION TABLE DOES NOT HAVE A CAPACITY COLUMN."
+        },
+        {
+          "query": "SELECT CAPACITY FROM CLASSROOM WHERE CAPACITY BETWEEN 50 AND 100;",
+          "error_type": "RETURNS THE CAPACITY NUMBERS THEMSELVES RATHER THAN THE ROOM NUMBERS AND BUILDINGS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the name and building of the department with the highest budget.",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT DEPT_NAME ,  BUILDING FROM DEPARTMENT ORDER BY BUDGET DESC LIMIT 1",
+        "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET = (SELECT MAX(BUDGET) FROM DEPARTMENT);",
+        "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT ORDER BY BUDGET DESC FETCH FIRST 1 ROW ONLY;",
+        "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET >= ALL(SELECT BUDGET FROM DEPARTMENT);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT ORDER BY BUDGET ASC LIMIT 1;",
+          "error_type": "RETURNS THE DEPARTMENT WITH THE SMALLEST BUDGET INSTEAD OF THE HIGHEST."
+        },
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT ORDER BY BUDGET DESC;",
+          "error_type": "RETURNS A LIST OF ALL DEPARTMENTS SORTED BY BUDGET, RATHER THAN JUST THE TOP ONE."
+        },
+        {
+          "query": "SELECT DEPT_NAME FROM DEPARTMENT ORDER BY BUDGET DESC LIMIT 1;",
+          "error_type": "MISSES THE BUILDING COLUMN REQUIRED BY THE QUESTION."
+        },
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT WHERE BUDGET = MAX(BUDGET);",
+          "error_type": "SQL SYNTAX ERROR. AGGREGATE FUNCTIONS CANNOT BE USED DIRECTLY IN THE WHERE CLAUSE."
+        },
+        {
+          "query": "SELECT DEPT_NAME, BUILDING FROM DEPARTMENT ORDER BY DEPT_NAME DESC LIMIT 1;",
+          "error_type": "RETURNS THE DEPARTMENT THAT COMES LAST ALPHABETICALLY, IGNORING THE BUDGET ENTIRELY."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the name of the student who has the highest total credits in the History department.",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT NAME FROM STUDENT WHERE DEPT_NAME  =  'HISTORY' ORDER BY TOT_CRED DESC LIMIT 1",
+        "SELECT NAME FROM STUDENT WHERE DEPT_NAME = 'HISTORY' AND TOT_CRED = (SELECT MAX(TOT_CRED) FROM STUDENT WHERE DEPT_NAME = 'HISTORY');",
+        "SELECT NAME FROM STUDENT WHERE DEPT_NAME = 'HISTORY' ORDER BY TOT_CRED DESC FETCH FIRST 1 ROW ONLY;",
+        "SELECT NAME FROM STUDENT WHERE DEPT_NAME = 'HISTORY' AND TOT_CRED >= ALL(SELECT TOT_CRED FROM STUDENT WHERE DEPT_NAME = 'HISTORY');"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT NAME FROM STUDENT ORDER BY TOT_CRED DESC LIMIT 1;",
+          "error_type": "RETURNS THE TOP STUDENT ACROSS ALL DEPARTMENTS, IGNORING THE HISTORY DEPARTMENT CONSTRAINT."
+        },
+        {
+          "query": "SELECT NAME FROM STUDENT WHERE DEPT_NAME = 'HISTORY' ORDER BY TOT_CRED ASC LIMIT 1;",
+          "error_type": "RETURNS THE STUDENT WITH THE FEWEST CREDITS INSTEAD OF THE HIGHEST."
+        },
+        {
+          "query": "SELECT NAME FROM STUDENT WHERE DEPT_NAME = 'HISTORY' ORDER BY TOT_CRED DESC;",
+          "error_type": "RETURNS A LIST OF ALL STUDENTS IN HISTORY SORTED BY CREDITS, RATHER THAN JUST THE TOP ONE."
+        },
+        {
+          "query": "SELECT MAX(NAME) FROM STUDENT WHERE DEPT_NAME = 'HISTORY';",
+          "error_type": "RETURNS THE NAME THAT COMES LAST ALPHABETICALLY, WHICH IS UNRELATED TO CREDIT TOTALS."
+        },
+        {
+          "query": "SELECT ID FROM STUDENT WHERE DEPT_NAME = 'HISTORY' ORDER BY TOT_CRED DESC LIMIT 1;",
+          "error_type": "RETURNS THE STUDENT ID INSTEAD OF THE STUDENT NAME."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many rooms does the Lamberton building have?",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING  =  'LAMBERTON'",
+        "SELECT COUNT(ROOM_NUMBER) FROM CLASSROOM WHERE BUILDING = 'LAMBERTON';",
+        "SELECT SUM(1) FROM CLASSROOM WHERE BUILDING = 'LAMBERTON';",
+        "SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING LIKE 'LAMBERTON';"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM CLASSROOM WHERE BUILDING != 'LAMBERTON';",
+          "error_type": "COUNTS ROOMS IN ALL BUILDINGS EXCEPT LAMBERTON."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM CLASSROOM;",
+          "error_type": "RETURNS THE TOTAL NUMBER OF ROOMS ACROSS THE ENTIRE UNIVERSITY, NOT JUST LAMBERTON."
+        },
+        {
+          "query": "SELECT SUM(CAPACITY) FROM CLASSROOM WHERE BUILDING = 'LAMBERTON';",
+          "error_type": "RETURNS THE TOTAL SEATING CAPACITY (NUMBER OF SEATS) INSTEAD OF THE NUMBER OF ROOMS."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM DEPARTMENT WHERE BUILDING = 'LAMBERTON';",
+          "error_type": "COUNTS HOW MANY DEPARTMENTS ARE HOUSED IN LAMBERTON, NOT HOW MANY CLASSROOMS IT HAS."
+        },
+        {
+          "query": "SELECT ROOM_NUMBER FROM CLASSROOM WHERE BUILDING = 'LAMBERTON';",
+          "error_type": "RETURNS THE LIST OF ROOM NUMBERS INSTEAD OF THE COUNT."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many students have advisors?",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(DISTINCT S_ID) FROM ADVISOR",
+        "SELECT COUNT(*) FROM STUDENT WHERE ID IN (SELECT S_ID FROM ADVISOR);",
+        "SELECT COUNT(*) FROM STUDENT AS T1 WHERE EXISTS (SELECT 1 FROM ADVISOR AS T2 WHERE T2.S_ID = T1.ID);",
+        "SELECT COUNT(DISTINCT T1.ID) FROM STUDENT AS T1 JOIN ADVISOR AS T2 ON T1.ID = T2.S_ID;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM STUDENT;",
+          "error_type": "COUNTS EVERY STUDENT IN THE UNIVERSITY, REGARDLESS OF WHETHER THEY HAVE AN ASSIGNED ADVISOR."
+        },
+        {
+          "query": "SELECT COUNT(DISTINCT I_ID) FROM ADVISOR;",
+          "error_type": "COUNTS HOW MANY INSTRUCTORS ARE ACTING AS ADVISORS, RATHER THAN HOW MANY STUDENTS ARE BEING ADVISED."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM STUDENT WHERE ID NOT IN (SELECT S_ID FROM ADVISOR);",
+          "error_type": "RETURNS THE COUNT OF STUDENTS WHO DO NOT HAVE AN ADVISOR."
+        },
+        {
+          "query": "SELECT S_ID FROM ADVISOR;",
+          "error_type": "RETURNS THE LIST OF STUDENT IDS INSTEAD OF THE TOTAL COUNT."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM INSTRUCTOR WHERE NAME = 'ADVISOR';",
+          "error_type": "QUERYING WRONG TABLE."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many departments offer courses?",
+    "db_id": "college_2",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(DISTINCT DEPT_NAME) FROM COURSE",
+        "SELECT COUNT(*) FROM (SELECT DISTINCT DEPT_NAME FROM COURSE) AS T;",
+        "SELECT COUNT(*) FROM DEPARTMENT WHERE DEPT_NAME IN (SELECT DEPT_NAME FROM COURSE);",
+        "SELECT COUNT(*) FROM DEPARTMENT AS T1 WHERE EXISTS (SELECT 1 FROM COURSE AS T2 WHERE T2.DEPT_NAME = T1.DEPT_NAME);",
+        "SELECT COUNT(DISTINCT T1.DEPT_NAME) FROM DEPARTMENT AS T1 JOIN COURSE AS T2 ON T1.DEPT_NAME = T2.DEPT_NAME;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM DEPARTMENT;",
+          "error_type": "COUNTS EVERY DEPARTMENT IN THE UNIVERSITY, REGARDLESS OF WHETHER THEY ACTUALLY OFFER ANY COURSES."
+        },
+        {
+          "query": "SELECT COUNT(DEPT_NAME) FROM COURSE;",
+          "error_type": "RETURNS THE TOTAL NUMBER OF COURSES RATHER THAN THE NUMBER OF UNIQUE DEPARTMENTS."
+        },
+        {
+          "query": "SELECT COUNT(DISTINCT TITLE) FROM COURSE;",
+          "error_type": "COUNTS HOW MANY UNIQUE COURSE TITLES EXIST, NOT DEPARTMENTS."
+        },
+        {
+          "query": "SELECT DISTINCT DEPT_NAME FROM COURSE;",
+          "error_type": "RETURNS THE LIST OF DEPARTMENT NAMES INSTEAD OF THE COUNT."
+        },
+        {
+          "query": "SELECT COUNT(DISTINCT ID) FROM TEACHES;",
+          "error_type": "COUNTS HOW MANY INSTRUCTORS ARE TEACHING, NOT HOW MANY DEPARTMENTS OFFER COURSES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the number of students in total.",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM LIST",
+        "SELECT COUNT(LASTNAME) FROM LIST;",
+        "SELECT COUNT(1) FROM LIST;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM TEACHERS;",
+          "error_type": "COUNTS THE NUMBER OF TEACHERS INSTEAD OF STUDENTS."
+        },
+        {
+          "query": "SELECT * FROM LIST;",
+          "error_type": "RETURNS THE ACTUAL LIST OF STUDENTS RATHER THAN THE COUNT."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM LIST GROUP BY CLASSROOM;",
+          "error_type": "RETURNS THE NUMBER OF STUDENTS PER CLASSROOM, NOT THE GRAND TOTAL."
+        },
+        {
+          "query": "SELECT SUM(GRADE) FROM LIST;",
+          "error_type": "MATHEMATICALLY ADDS UP THE GRADE LEVELS."
+        },
+        {
+          "query": "SELECT LASTNAME FROM LIST;",
+          "error_type": "RETURNS A LIST OF LAST NAMES INSTEAD OF THE TOTAL NUMBER OF STUDENTS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the last names of students studying in room 111.",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT LASTNAME FROM LIST WHERE CLASSROOM  =  111",
+        "SELECT DISTINCT LASTNAME FROM LIST WHERE CLASSROOM = 111;",
+        "SELECT LASTNAME FROM LIST WHERE CLASSROOM IN (111);",
+        "SELECT LASTNAME, FIRSTNAME FROM LIST WHERE CLASSROOM = 111;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT LASTNAME FROM TEACHERS WHERE CLASSROOM = 111;",
+          "error_type": "RETURNS THE LAST NAME OF THE TEACHER IN ROOM 111, NOT THE STUDENTS."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM LIST WHERE CLASSROOM = 111;",
+          "error_type": "RETURNS THE FIRST NAMES INSTEAD OF LAST NAMES."
+        },
+        {
+          "query": "SELECT LASTNAME FROM LIST;",
+          "error_type": "RETURNS THE LAST NAMES OF ALL STUDENTS IN THE SCHOOL, REGARDLESS OF ROOM."
+        },
+        {
+          "query": "SELECT LASTNAME FROM LIST WHERE CLASSROOM = 112;",
+          "error_type": "RETURNS STUDENTS FROM THE WRONG ROOM."
+        },
+        {
+          "query": "SELECT LASTNAME FROM LIST WHERE GRADE = 111;",
+          "error_type": "LOOKS FOR STUDENTS IN GRADE 111, WHICH IS LOGICALLY INCORRECT."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the first names of students studying in room 108.",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT FIRSTNAME FROM LIST WHERE CLASSROOM  =  108",
+        "SELECT DISTINCT FIRSTNAME FROM LIST WHERE CLASSROOM = 108;",
+        "SELECT FIRSTNAME FROM LIST WHERE CLASSROOM IN (108);",
+        "SELECT FIRSTNAME, LASTNAME FROM LIST WHERE CLASSROOM = 108;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT FIRSTNAME FROM TEACHERS WHERE CLASSROOM = 108;",
+          "error_type": "RETURNS THE FIRST NAME OF THE TEACHER IN ROOM 108, NOT THE STUDENTS."
+        },
+        {
+          "query": "SELECT LASTNAME FROM LIST WHERE CLASSROOM = 108;",
+          "error_type": "RETURNS THE LAST NAMES INSTEAD OF FIRST NAMES."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM LIST;",
+          "error_type": "RETURNS THE FIRST NAMES OF ALL STUDENTS IN THE SCHOOL, REGARDLESS OF ROOM."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM LIST WHERE CLASSROOM = 109;",
+          "error_type": "RETURNS STUDENTS FROM THE WRONG ROOM."
+        },
+        {
+          "query": "SELECT CLASSROOM FROM LIST WHERE CLASSROOM = 108;",
+          "error_type": "RETURNS THE NUMBER 108 REPEATEDLY INSTEAD OF THE NAMES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "For each classroom report the grade that is taught in it. Report just the classroom number and the grade number.",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT CLASSROOM ,  GRADE FROM LIST",
+        "SELECT CLASSROOM, GRADE FROM LIST GROUP BY CLASSROOM, GRADE;",
+        "SELECT DISTINCT CLASSROOM, GRADE FROM LIST ORDER BY CLASSROOM;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CLASSROOM, GRADE FROM LIST;",
+          "error_type": "RETURNS A ROW FOR EVERY SINGLE STUDENT, LISTING THE SAME CLASSROOM AND GRADE PAIR DOZENS OF TIMES."
+        },
+        {
+          "query": "SELECT CLASSROOM, GRADE FROM TEACHERS;",
+          "error_type": "THE TEACHERS TABLE DOES NOT CONTAIN THE GRADE COLUMN."
+        },
+        {
+          "query": "SELECT CLASSROOM, GRADE FROM LIST GROUP BY CLASSROOM;",
+          "error_type": "INVALID SQL. CANNOT SELECT GRADE WITHOUT AN AGGREGATE FUNCTION OR INCLUDING IT IN THE GROUP BY CLAUSE."
+        },
+        {
+          "query": "SELECT DISTINCT CLASSROOM FROM LIST;",
+          "error_type": "MISSES THE GRADE NUMBER REQUESTED."
+        },
+        {
+          "query": "SELECT LASTNAME, GRADE FROM LIST;",
+          "error_type": "RETURNS STUDENT NAMES INSTEAD OF CLASSROOM NUMBERS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Which grade is studying in classroom 103?",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT GRADE FROM LIST WHERE CLASSROOM  =  103",
+        "SELECT GRADE FROM LIST WHERE CLASSROOM = 103 LIMIT 1;",
+        "SELECT GRADE FROM LIST WHERE CLASSROOM = 103 GROUP BY GRADE;",
+        "SELECT GRADE FROM LIST WHERE CLASSROOM = 103;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT GRADE FROM TEACHERS WHERE CLASSROOM = 103;",
+          "error_type": "THE TEACHERS TABLE DOES NOT CONTAIN THE GRADE COLUMN."
+        },
+        {
+          "query": "SELECT GRADE FROM LIST WHERE CLASSROOM = 104;",
+          "error_type": "RETRIEVES THE GRADE FOR THE WRONG ROOM."
+        },
+        {
+          "query": "SELECT DISTINCT GRADE FROM LIST;",
+          "error_type": "RETURNS ALL GRADES TAUGHT IN THE SCHOOL, NOT JUST THE ONE IN ROOM 103."
+        },
+        {
+          "query": "SELECT CLASSROOM FROM LIST WHERE CLASSROOM = 103;",
+          "error_type": "RETURNS 103 INSTEAD OF THE GRADE LEVEL"
+        }
+      ]
+    }
+  },
+  {
+    "question": "Which classrooms are used by grade 4?",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT CLASSROOM FROM LIST WHERE GRADE  =  4",
+        "SELECT CLASSROOM FROM LIST WHERE GRADE = 4 GROUP BY CLASSROOM;",
+        "SELECT DISTINCT CLASSROOM FROM LIST WHERE GRADE IN (4);",
+        "SELECT DISTINCT CLASSROOM FROM LIST AS T1 WHERE EXISTS (SELECT 1 FROM LIST AS T2 WHERE T2.CLASSROOM = T1.CLASSROOM AND T2.GRADE = 4);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CLASSROOM FROM TEACHERS WHERE GRADE = 4;",
+          "error_type": "THE TEACHERS TABLE DOES NOT CONTAIN THE GRADE COLUMN."
+        },
+        {
+          "query": "SELECT CLASSROOM FROM LIST WHERE GRADE = 4;",
+          "error_type": "RETURNS THE CLASSROOM NUMBER REPEATED FOR EVERY SINGLE STUDENT IN GRADE 4."
+        },
+        {
+          "query": "SELECT DISTINCT CLASSROOM FROM LIST WHERE GRADE = 5;",
+          "error_type": "RETURNS CLASSROOMS FOR THE WRONG GRADE."
+        },
+        {
+          "query": "SELECT DISTINCT GRADE FROM LIST WHERE GRADE = 4;",
+          "error_type": "RETURNS 4 INSTEAD OF THE CLASSROOM NUMBER."
+        },
+        {
+          "query": "SELECT DISTINCT CLASSROOM FROM LIST;",
+          "error_type": "RETURNS A LIST OF ALL CLASSROOMS IN THE SCHOOL, NOT JUST THOSE FOR GRADE 4."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the last names of the teachers that teach fifth grade.",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT T2.LASTNAME FROM LIST AS T1 JOIN TEACHERS AS T2 ON T1.CLASSROOM  =  T2.CLASSROOM WHERE GRADE  =  5",
+        "SELECT DISTINCT T2.LASTNAME FROM LIST AS T1, TEACHERS AS T2 WHERE T1.CLASSROOM = T2.CLASSROOM AND T1.GRADE = 5;",
+        "SELECT DISTINCT LASTNAME FROM TEACHERS WHERE CLASSROOM IN (SELECT CLASSROOM FROM LIST WHERE GRADE = 5);",
+        "SELECT DISTINCT LASTNAME FROM TEACHERS AS T1 WHERE EXISTS (SELECT 1 FROM LIST AS T2 WHERE T2.CLASSROOM = T1.CLASSROOM AND T2.GRADE = 5);",
+        "SELECT DISTINCT T1.LASTNAME FROM TEACHERS AS T1 JOIN LIST AS T2 ON T1.CLASSROOM = T2.CLASSROOM WHERE T2.GRADE = 5;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT LASTNAME FROM TEACHERS WHERE GRADE = 5;",
+          "error_type": "THE TEACHERS TABLE DOES NOT HAVE A GRADE COLUMN. THE GRADE INFORMATION IS IN THE LIST TABLE."
+        },
+        {
+          "query": "SELECT LASTNAME FROM LIST WHERE GRADE = 5;",
+          "error_type": "RETURNS THE LAST NAMES OF THE STUDENTS IN 5TH GRADE, NOT THE TEACHERS."
+        },
+        {
+          "query": "SELECT T2.LASTNAME FROM LIST AS T1 JOIN TEACHERS AS T2 ON T1.CLASSROOM = T2.CLASSROOM WHERE T1.GRADE = 5;",
+          "error_type": "RETURNS THE TEACHER'S NAME REPEATED FOR EVERY SINGLE STUDENT IN THE 5TH GRADE."
+        },
+        {
+          "query": "SELECT LASTNAME FROM TEACHERS WHERE CLASSROOM = 5;",
+          "error_type": "RETURNS THE TEACHER ASSIGNED TO ROOM 5, RATHER THAN THE TEACHER TEACHING GRADE 5."
+        },
+        {
+          "query": "SELECT DISTINCT CLASSROOM FROM LIST WHERE GRADE = 5;",
+          "error_type": "RETURNS THE CLASSROOM NUMBERS INSTEAD OF THE TEACHERS' NAMES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the first names of the teachers who teach grade 1?",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT T2.FIRSTNAME FROM LIST AS T1 JOIN TEACHERS AS T2 ON T1.CLASSROOM  =  T2.CLASSROOM WHERE GRADE  =  1",
+        "SELECT DISTINCT T2.FIRSTNAME FROM LIST AS T1, TEACHERS AS T2 WHERE T1.CLASSROOM = T2.CLASSROOM AND T1.GRADE = 1;",
+        "SELECT DISTINCT FIRSTNAME FROM TEACHERS WHERE CLASSROOM IN (SELECT CLASSROOM FROM LIST WHERE GRADE = 1);",
+        "SELECT DISTINCT FIRSTNAME FROM TEACHERS AS T1 WHERE EXISTS (SELECT 1 FROM LIST AS T2 WHERE T2.CLASSROOM = T1.CLASSROOM AND T2.GRADE = 1);"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT FIRSTNAME FROM TEACHERS WHERE GRADE = 1;",
+          "error_type": "THE TEACHERS TABLE DOES NOT CONTAIN THE GRADE COLUMN."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM LIST WHERE GRADE = 1;",
+          "error_type": "RETURNS THE FIRST NAMES OF THE STUDENTS IN GRADE 1, NOT THE TEACHERS."
+        },
+        {
+          "query": "SELECT T2.FIRSTNAME FROM LIST AS T1 JOIN TEACHERS AS T2 ON T1.CLASSROOM = T2.CLASSROOM WHERE T1.GRADE = 1;",
+          "error_type": "RETURNS THE TEACHER'S NAME REPEATED FOR EVERY STUDENT IN THE CLASS."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM TEACHERS WHERE CLASSROOM = 1;",
+          "error_type": "RETURNS THE TEACHER ASSIGNED TO ROOM 1, RATHER THAN THE TEACHER FOR GRADE 1."
+        },
+        {
+          "query": "SELECT DISTINCT T2.LASTNAME FROM LIST AS T1 JOIN TEACHERS AS T2 ON T1.CLASSROOM = T2.CLASSROOM WHERE T1.GRADE = 1;",
+          "error_type": "RETURNS THE LAST NAMES INSTEAD OF THE FIRST NAMES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Find the first names of all the teachers that teach in classroom 110.",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT FIRSTNAME FROM TEACHERS WHERE CLASSROOM  =  110",
+        "SELECT DISTINCT FIRSTNAME FROM TEACHERS WHERE CLASSROOM = 110;",
+        "SELECT FIRSTNAME FROM TEACHERS WHERE CLASSROOM IN (110);",
+        "SELECT FIRSTNAME FROM TEACHERS WHERE CLASSROOM = 110 OR CLASSROOM = 110;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT FIRSTNAME FROM LIST WHERE CLASSROOM = 110;",
+          "error_type": "RETURNS THE FIRST NAMES OF THE STUDENTS IN ROOM 110, NOT THE TEACHERS."
+        },
+        {
+          "query": "SELECT LASTNAME FROM TEACHERS WHERE CLASSROOM = 110;",
+          "error_type": "RETURNS THE LAST NAMES INSTEAD OF FIRST NAMES."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM TEACHERS;",
+          "error_type": "RETURNS THE FIRST NAMES OF ALL TEACHERS IN THE SCHOOL, REGARDLESS OF ROOM."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM TEACHERS WHERE CLASSROOM = 111;",
+          "error_type": "RETURNS THE TEACHER FROM THE WRONG ROOM."
+        },
+        {
+          "query": "SELECT FIRSTNAME FROM TEACHERS WHERE GRADE = 110;",
+          "error_type": "SQL ERROR. THE TEACHERS TABLE DOES NOT CONTAIN THE GRADE COLUMN."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Report the first name and last name of all the teachers.",
+    "db_id": "student_1",
+    "queries": {
+      "correct_queries": [
+        "SELECT DISTINCT FIRSTNAME ,  LASTNAME FROM TEACHERS",
+        "SELECT FIRSTNAME, LASTNAME FROM TEACHERS;",
+        "SELECT T1.FIRSTNAME, T1.LASTNAME FROM TEACHERS AS T1;",
+        "SELECT DISTINCT FIRSTNAME, LASTNAME FROM TEACHERS ORDER BY FIRSTNAME;",
+        "SELECT FIRSTNAME || ' ' || LASTNAME AS FULLNAME FROM TEACHERS;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT FIRSTNAME, LASTNAME FROM LIST;",
+          "error_type": "FAILS TO REPORT THE LAST NAME."
+        },
+        {
+          "query": "SELECT CLASSROOM FROM TEACHERS;",
+          "error_type": "RETURNS THE CLASSROOM NUMBER INSTEAD OF THE NAMES."
+        },
+        {
+          "query": "SELECT FIRSTNAME, LASTNAME FROM TEACHERS WHERE CLASSROOM = 110;",
+          "error_type": "RETURNS ONLY A SPECIFIC TEACHER, NOT ALL TEACHERS."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM TEACHERS;",
+          "error_type": "RETURNS THE TOTAL NUMBER OF TEACHERS INSTEAD OF THEIR ACTUAL NAMES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many courses are there in total?",
+    "db_id": "college_3",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM COURSE",
+        "SELECT COUNT(CID) FROM COURSE;",
+        "SELECT COUNT(CNAME) FROM COURSE;",
+        "SELECT COUNT(1) FROM COURSE;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM ENROLLED_IN;",
+          "error_type": "COUNTS THE TOTAL NUMBER OF ENROLLMENTS, NOT THE UNIQUE COURSES DEFINED IN THE CATALOG."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM STUDENT;",
+          "error_type": "COUNTS STUDENTS INSTEAD OF COURSES."
+        },
+        {
+          "query": "SELECT * FROM COURSE;",
+          "error_type": "RETURNS THE RAW DATA ROWS RATHER THAN A SINGLE COUNT."
+        },
+        {
+          "query": "SELECT SUM(CREDITS) FROM COURSE;",
+          "error_type": "RETURNS THE SUM OF ALL CREDITS ACROSS ALL COURSES, NOT THE NUMBER OF COURSES."
+        },
+        {
+          "query": "SELECT COUNT(DISTINCT DNO) FROM COURSE;",
+          "error_type": "COUNTS HOW MANY DEPARTMENTS ARE OFFERING COURSES, RATHER THAN THE COURSES THEMSELVES."
+        }
+      ]
+    }
+  },
+  {
+    "question": "How many courses have more than 2 credits?",
+    "db_id": "college_3",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM COURSE WHERE CREDITS  >  2",
+        "SELECT COUNT(CID) FROM COURSE WHERE CREDITS > 2;",
+        "SELECT COUNT(1) FROM COURSE WHERE CREDITS > 2;",
+        "SELECT COUNT(*) FROM COURSE WHERE NOT CREDITS <= 2;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM COURSE WHERE CREDITS < 2;",
+          "error_type": "COUNTS COURSES WITH FEWER THAN 2 CREDITS."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM COURSE WHERE CREDITS >= 2;",
+          "error_type": "INCLUDES COURSES WITH EXACTLY 2 CREDITS, VIOLATING MORE THAN 2."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM COURSE;",
+          "error_type": "COUNTS ALL COURSES REGARDLESS OF CREDIT VALUE."
+        },
+        {
+          "query": "SELECT SUM(CREDITS) FROM COURSE WHERE CREDITS > 2;",
+          "error_type": "ADDS UP THE TOTAL CREDIT VALUES INSTEAD OF COUNTING THE NUMBER OF COURSES."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM ENROLLED_IN WHERE GRADE > 2;",
+          "error_type": "QUERIES ENROLLMENTS AND GRADES INSTEAD OF COURSE CREDITS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "List all names of courses with 1 credit?",
+    "db_id": "college_3",
+    "queries": {
+      "correct_queries": [
+        "SELECT CNAME FROM COURSE WHERE CREDITS  =  1",
+        "SELECT DISTINCT CNAME FROM COURSE WHERE CREDITS = 1;",
+        "SELECT CNAME FROM COURSE WHERE CREDITS IN (1);",
+        "SELECT CNAME FROM COURSE WHERE CREDITS = 1 ORDER BY CNAME;"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CNAME FROM COURSE WHERE CREDITS > 1;",
+          "error_type": "LISTS COURSES WITH MORE THAN 1 CREDIT INSTEAD OF EXACTLY 1."
+        },
+        {
+          "query": "SELECT CNAME FROM COURSE;",
+          "error_type": "RETURNS NAMES OF ALL COURSES, REGARDLESS OF CREDITS."
+        },
+        {
+          "query": "SELECT CID FROM COURSE WHERE CREDITS = 1;",
+          "error_type": "RETURNS THE COURSE ID INSTEAD OF THE COURSE NAME."
+        },
+        {
+          "query": "SELECT CNAME FROM ENROLLED_IN WHERE GRADE = 1;",
+          "error_type": "CNAME DOESN'T EXIST IN THE ENROLLMENT TABLE, AND GRADE IS NOT THE SAME AS CREDITS."
+        }
+      ]
+    }
+  },
+  {
+    "question": "Which courses are taught on days MTW?",
+    "db_id": "college_3",
+    "queries": {
+      "correct_queries": [
+        "SELECT CNAME FROM COURSE WHERE DAYS  =  \"MTW\"",
+        "SELECT CNAME FROM COURSE WHERE DAYS IN ('MTW');",
+        "SELECT CNAME FROM COURSE WHERE DAYS LIKE 'MTW';",
+        "SELECT DISTINCT CNAME FROM COURSE WHERE DAYS = 'MTW';"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT CNAME FROM ENROLLED_IN WHERE DAYS = 'MTW';",
+          "error_type": "THE ENROLLED_IN TABLE DOES NOT CONTAIN COURSE NAMES OR SCHEDULE INFORMATION."
+        },
+        {
+          "query": "SELECT CID FROM COURSE WHERE DAYS = 'MTW';",
+          "error_type": "RETURNS THE COURSE ID INSTEAD OF THE COURSE NAME."
+        },
+        {
+          "query": "SELECT CNAME FROM COURSE;",
+          "error_type": "RETURNS THE NAMES OF ALL COURSES, REGARDLESS OF WHEN THEY ARE TAUGHT."
+        },
+        {
+          "query": "SELECT CNAME FROM COURSE WHERE DAYS != 'MTW';",
+          "error_type": "RETURNS COURSES TAUGHT ON DAYS OTHER THAN MTW."
+        },
+        {
+          "query": "SELECT CNAME FROM COURSE WHERE CNAME = 'MTW';",
+          "error_type": "LOOKS FOR A COURSE NAMED MTW RATHER THAN CHECKING THE SCHEDULE."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What is the number of departments in Division \"AS\"?",
+    "db_id": "college_3",
+    "queries": {
+      "correct_queries": [
+        "SELECT COUNT(*) FROM DEPARTMENT WHERE DIVISION  =  \"AS\"",
+        "SELECT COUNT(DNO) FROM DEPARTMENT WHERE DIVISION = 'AS';",
+        "SELECT COUNT(1) FROM DEPARTMENT WHERE DIVISION = 'AS';",
+        "SELECT COUNT(DNAME) FROM DEPARTMENT WHERE DIVISION = 'AS';"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT COUNT(*) FROM DEPARTMENT;",
+          "error_type": "RETURNS THE TOTAL NUMBER OF DEPARTMENTS IN THE COLLEGE, REGARDLESS OF DIVISION."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM DEPARTMENT WHERE DIVISION != 'AS';",
+          "error_type": "COUNTS DEPARTMENTS THAT ARE NOT IN DIVISION 'AS'."
+        },
+        {
+          "query": "SELECT DNAME FROM DEPARTMENT WHERE DIVISION = 'AS';",
+          "error_type": "RETURNS THE NAMES OF THE DEPARTMENTS INSTEAD OF THE COUNT."
+        },
+        {
+          "query": "SELECT COUNT(*) FROM FACULTY WHERE DIVISION = 'AS';",
+          "error_type": "THE FACULTY TABLE DOES NOT CONTAIN THE DIVISION COLUMN."
+        },
+        {
+          "query": "SELECT DIVISION, COUNT(*) FROM DEPARTMENT GROUP BY DIVISION;",
+          "error_type": "RETURNS A LIST OF COUNTS FOR EVERY DIVISION, RATHER THAN A SINGLE NUMBER FOR 'AS'."
+        }
+      ]
+    }
+  },
+  {
+    "question": "What are the phones of departments in Room 268?",
+    "db_id": "college_3",
+    "queries": {
+      "correct_queries": [
+        "SELECT DPHONE FROM DEPARTMENT WHERE ROOM  =  268",
+        "SELECT DISTINCT DPHONE FROM DEPARTMENT WHERE ROOM = 268;",
+        "SELECT DPHONE FROM DEPARTMENT WHERE ROOM IN (268);",
+        "SELECT DPHONE FROM DEPARTMENT WHERE ROOM = '268';"
+      ],
+      "incorrect_queries": [
+        {
+          "query": "SELECT PHONE FROM FACULTY WHERE ROOM = 268;",
+          "error_type": "RETURNS THE PHONE NUMBERS OF FACULTY MEMBERS IN ROOM 268, NOT DEPARTMENTS."
+        },
+        {
+          "query": "SELECT DNAME FROM DEPARTMENT WHERE ROOM = 268;",
+          "error_type": "RETURNS THE DEPARTMENT NAMES INSTEAD OF THE PHONE NUMBERS."
+        },
+        {
+          "query": "SELECT DPHONE FROM DEPARTMENT;",
+          "error_type": "RETURNS PHONE NUMBERS FOR ALL DEPARTMENTS, REGARDLESS OF LOCATION."
+        },
+        {
+          "query": "SELECT DPHONE FROM DEPARTMENT WHERE DNO = 268;",
+          "error_type": "FILTERS BY DEPARTMENT NUMBER INSTEAD OF ROOM NUMBER."
+        },
+        {
+          "query": "SELECT COUNT(DPHONE) FROM DEPARTMENT WHERE ROOM = 268;",
+          "error_type": "RETURNS THE COUNT OF PHONE NUMBERS INSTEAD OF THE NUMBERS THEMSELVES."
+        }
+      ]
+    }
+  }
+]

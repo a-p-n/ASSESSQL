@@ -1,0 +1,9 @@
+torch
+transformers
+accelerate
+sqlalchemy
+sqlglot
+pymupdf           
+pytesseract
+pdf2image
+pillow

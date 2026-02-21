@@ -1,0 +1,102 @@
+[
+  {
+    "question": "Add a column 'JoiningDate' to the emp table with the constraint that JoiningDate is not null.",
+    "db_id": "question_1",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Add a column HOD in DEPT table with proper referential integrity.",
+    "db_id": "question_1",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Find the eno of those employees who work in the dept with dept_no 'D1'",
+    "db_id": "question_1",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Select all data from the DEPT table",
+    "db_id": "question_1",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Create a query to display the name, joining date, and employee number for each employee, with  employee number appearing first.",
+    "db_id": "question_1",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Change the datatype of cname to varchar.",
+    "db_id": "question_2",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Add a constraint to the column 'credits' of Course table so that the credit should be >0",
+    "db_id": "question_2",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Add two columns 'dob', 'cgpa' to Student table.",
+    "db_id": "question_2",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Delete column 'age' from Student table.",
+    "db_id": "question_2",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Retrieve the dob and Sno of the student(s) whose name is 'Rahul'",
+    "db_id": "question_2",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Add a column 'date' to the Supplier_Parts table.",
+    "db_id": "question_3",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Change the name of table 'Supplier_Parts' to 'Parts_Supplied'",
+    "db_id": "question_3",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Find the suppliers coming from the city which starts with letter 'T' and 'A' as the last character.",
+    "db_id": "question_3",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Delete table 'Parts_Supplied'",
+    "db_id": "question_3",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Change the size of Sname column in Supplier table to 25.",
+    "db_id": "question_3",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Add columns Sw_id and developed_in to the software table which should not left blank.",
+    "db_id": "question_4",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Add primary key on the Sw_id column.",
+    "db_id": "question_4",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Drop the constraint on the selling cost column.",
+    "db_id": "question_4",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Change the name of column 'Doj' to 'hire_date' in Programmer table",
+    "db_id": "question_4",
+    "query": "SELECT * FROM ..."
+  },
+  {
+    "question": "Add foreign key on the column Pname in Studies table that refers to Programmer table.",
+    "db_id": "question_4",
+    "query": "SELECT * FROM ..."
+  }
+]

@@ -1,0 +1,142 @@
+[
+  {
+    "question": "Add a column 'JoiningDate' to the emp table with the constraint that JoiningDate is not null.",
+    "db_id": "question_1",
+    "generated_sql": "SELECT COUNT(emp_table) FROM table_name_34 WHERE joining_date = \"not null\" AND ename_varchar_not_number = \"not null\" AND basic_sal_integer_default = \"5000\" AND incentive_integer Should not be greater than basic_sal, dept_no_varchar Refers to dno of Dept table, mgr_id_varchar Refers to ",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Add a column HOD in DEPT table with proper referential integrity.",
+    "db_id": "question_1",
+    "generated_sql": "SELECT CREATE_TABLE_EMP ( Eno Varchar PK, Ename Varchar Not Null, Basic-Sal Integer Default Value 5000, incentive_integer Should not be > basic_sal, dept_no Varchar Refers to dno of Dept Table, mgr_id Varchar Refers to eno DEPT ); CREATE_TABLE DEPT ( Dno Varchar PK, Dname Var",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Find the eno of those employees who work in the dept with dept_no 'D1'",
+    "db_id": "question_1",
+    "generated_sql": "SELECT eno FROM table_name_65 WHERE dept_no__d1__schema = \"cREATE TABLE EMP ( Eno Varchar PK, Ename Varchar Not Null, Basic-Sal Integer Default = 5000, incentive_integer Should not be > basic_sal, dept_no Varchar Refers to dno of Dept Table, mgr_id Varchar Refers to",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Select all data from the DEPT table",
+    "db_id": "question_1",
+    "generated_sql": "SELECT COUNT(dePT_table_schema) FROM table_name_94 WHERE dept_no_varchar = \"dno of Dept table, mgr_id Varchar Refers to eno dePT ); dept_tABLE_dePT = \"dno Varchar PK, ename Varchar Not null, basic-sal integer Default_value 5000\"",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Create a query to display the name, joining date, and employee number for each employee, with  employee number appearing first.",
+    "db_id": "question_1",
+    "generated_sql": "SELECT employee_name, joining_date, employee_number FROM employee_numbers. SELECT employee_number FROM employee_numbers. schema: CREATE TABLE EMP ( eno_varchar PK, ename_varchar not null, basic_sal_integer_default_value 5000, incentive_integer Should not be > basic_sal, dept_no_varchar Refers to dn",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Change the datatype of cname to varchar.",
+    "db_id": "question_2",
+    "generated_sql": "SELECT CREATE_tABLE_student____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Add a constraint to the column 'credits' of Course table so that the credit should be >0",
+    "db_id": "question_2",
+    "generated_sql": "SELECT COUNT(credits) FROM table_name_50 WHERE credit = \" >0\" AND schema = \"cREATE TABLE Student ( sno Varchar PK, sname Varchar Not null, age Integer Must >0, gender_char Should contain 'M' or F as values Course ); CREATE TABLE Course ( Cno Varchar PK, Cname char(10) Notnull, Credits Integer Student_Co",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Add two columns 'dob', 'cgpa' to Student table.",
+    "db_id": "question_2",
+    "generated_sql": "SELECT CREATE_tABLE_student____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Delete column 'age' from Student table.",
+    "db_id": "question_2",
+    "generated_sql": "SELECT CREATE_tABLE_student____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Retrieve the dob and Sno of the student(s) whose name is 'Rahul'",
+    "db_id": "question_2",
+    "generated_sql": "SELECT dob_and_sno_of_student_s_ FROM table_name_94 WHERE name = \"rahul\" = \"create_tABLE student ( sno varchar PK, sname varchar not null, age_integer Must >0, gender_char Should contain'm' or f as values course ); create_tABLE course ( cno varchar PK, ",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Add a column 'date' to the Supplier_Parts table.",
+    "db_id": "question_3",
+    "generated_sql": "SELECT supplier__Parts________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Change the name of table 'Supplier_Parts' to 'Parts_Supplied'",
+    "db_id": "question_3",
+    "generated_sql": "SELECT table_name_32 WHERE table_name = \"supplier_parts\" AND table_name = \"parts_supplied\" AND table_name = \"sno varchar pc, sname varchar not null, city varchar parts ); create_taint_parts = \"pno varchar pc, pname varchar should not be left blank, color_char(10),",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Find the suppliers coming from the city which starts with letter 'T' and 'A' as the last character.",
+    "db_id": "question_3",
+    "generated_sql": "SELECT supplier__parts FROM table_name_94 WHERE last_character = \"t\" AND last_character = \"a\" AND date = \"sno varchar pc, sname varchar not null, city varchar parts ); SELECT supplier__parts__________________________________________",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Delete table 'Parts_Supplied'",
+    "db_id": "question_3",
+    "generated_sql": "SELECT COUNT(Parts_Supplied) FROM table_name_70 WHERE sno_of_contractor_table = \"no Varchar PK, sname_varchar not null, city_varchar parts ); sno_of_contractor_table = \"no Varchar PK, pname_varchar Should not be left blank, color_char(10), weight_number_provider_parts ); sn",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Change the size of Sname column in Supplier table to 25.",
+    "db_id": "question_3",
+    "generated_sql": "SELECT CREATE_TABLE_Parts____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Add columns Sw_id and developed_in to the software table which should not left blank.",
+    "db_id": "question_4",
+    "generated_sql": "SELECT CREATE_TABLE_Programmer FROM table_name_94 WHERE title = \"varchar not null, dob date not null, doj date Must be > dob, gender_char Must contain 'M' or 'F', sal numeric studies ); CREATE_TABLE_ Studies ( pno Varchar Foreign key, study_place Varchar Not null, course Varchar, course_fee Numeric Software ); CREATE_",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Add primary key on the Sw_id column.",
+    "db_id": "question_4",
+    "generated_sql": "SELECT CREATE_TABLE_Programmer ( Pno_varchar_PK, Pname_varchar Not Null, Dob_Date Not Null, Doj_Date Must be > dob, Gender_Char Must contain 'M' or 'F', Sal Numeric Studies ); CREATE_TABLE_ Studies ( Pno_varchar Foreign Key, study_place Varchar Not Null, course Varchar, course_fee Numeric Software",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Drop the constraint on the selling cost column.",
+    "db_id": "question_4",
+    "generated_sql": "SELECT COUNT(sales_cost_sales) FROM table_name_94 WHERE selling_cost_programmer = \"pno varchar PK, pname varchar not null, dob date not null, doj date Must be > dob, gender_char Must contain'm' or 'f', sal numeric studies ); create_tABLE studies ( pno varchar foreign key, study_place Varchar Not nu",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Change the name of column 'Doj' to 'hire_date' in Programmer table",
+    "db_id": "question_4",
+    "generated_sql": "SELECT CREATE_TABLE_Programmer___________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+    "syntax_valid": false,
+    "error_log": null
+  },
+  {
+    "question": "Add foreign key on the column Pname in Studies table that refers to Programmer table.",
+    "db_id": "question_4",
+    "generated_sql": "SELECT CREATE_TABLE_Programmer___pno_varchar_PK__pname_varchar_not null, dob_date__not null, doj_date__may be > dob, gender_char__may contain 'M' or 'F', sal numeric studies ); CREATE_TABLE_ Studies ( pno_varchar foreign_key, study_place_varchar_not null, course",
+    "syntax_valid": false,
+    "error_log": null
+  }
+]
